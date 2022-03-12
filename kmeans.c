@@ -153,7 +153,7 @@ static PyObject* mykmeanssp(PyObject *self, PyObject *args){
     put_centroids(py_centroids, centroids, k);
     free(centroids[0]);
     free(centroids);
-    free(datapoints[0])
+    free(datapoints[0]);
     free(datapoints);
     return py_centroids;
 }
