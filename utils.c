@@ -33,3 +33,30 @@ static void print_error(){
     printf("An Error Has Occurred!\n");
     exit(1);
 }
+
+void print_invalid_input(){
+    printf("Invalid Input!\n");
+    exit(1);
+}
+
+int check_is_num(char *str) {
+    int i;
+    for(i=0;str[i]!=0;i++){
+        if(!isdigit(str[i])){
+            print_invalid_input();
+        }
+    }
+    return 1;
+}
+
+void print_matrix(double **matrix, int n, int d){
+    int i, j;
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < d; j++)
+        {
+            printf("%d\t", matrix[i][j]);
+        }
+        printf("\n");
+    }
+}

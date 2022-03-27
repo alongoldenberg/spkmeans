@@ -17,7 +17,7 @@ static double update_centroids(double **centroids, double **datapoints, int k, i
 static void update_cumulative_sums(double *arr, double *cumulative_sum);
 
 static void print_error(){
-    printf("An Error Has Occurred!\n");
+    printf("An Error Has Occ urred!\n");
     exit(1);
 }
 
