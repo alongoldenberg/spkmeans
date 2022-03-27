@@ -8,7 +8,8 @@
 double **allocate_data(int n, int d);
 double distance(double *arr1, double *arr2, int d);
 static void print_error();
-
-
+void print_invalid_input();
+int check_is_num(char *str);
+void print_matrix(double **matrix, int n, int d);
 
 #endif //SPKMEANS_UTILS_H
