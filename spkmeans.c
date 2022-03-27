@@ -265,3 +265,56 @@ int main(int argc, char **argv){
 
 
 
+static double **degree_to_diagonal_matrix(double *degree){
+    double **diagonal_degree_matrix_res;
+    diagonal_degree_matrix_res = allocate_data(n, n);
+    int i,j;
+    for (i=0 ; i<n; i++){
+        for (j=0 ; j<n; j++){
+            diagonal_degree_matrix_res[i][j] = degree[i];
+        }
+    }
+    return diagonal_degree_matrix_res;
+}
+
+
+int main(int argc, char *argv[]){
+    enum Goal {wam, ddg, lnorm, jacobi} goal;
+    char *file_name;
+    double **datapoints;
+    int k;
+    double **weight_adj_matrix_res; double *degree; double **lap_res;
+    double **diagonal_degree_matrix_res;
+    if (argc == 4) {
+        k = atoi(argv[1]);
+        goal = argv[2];
+        file_name = argv[3];
+    }
+    else{
+        printf("Invalid Input!");
+        return 1;
+    }
+    datapoints = parse_file(file_name);
+    switch (goal)
+    {
+        case wam:
+            weight_adj_matrix_res = weight_adj_matrix(datapoints);
+            print_data(weight_adj_matrix_res);
+            break;
+        case ddg:
+            degree = diagonal_degree_matrix(weight_adj_matrix_res);
+            diagonal_degree_matrix_res = degree_to_diagonal_matrix(degree);
+            print_data(diagonal_degree_matrix_res);
+            break;
+        case lnorm:
+            lap_res = normalized_laplacian(weight_adj_matrix_res, degree);
+            print_data(lap_res);
+            break;
+        case jacobi:
+        //need to complete;
+        default:
+            printf("Invalid Input!");
+        return 1;
+    }  
+    return 0;
+}
