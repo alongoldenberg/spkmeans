@@ -33,3 +33,35 @@ static void print_error(){
     printf("An Error Has Occurred!\n");
     exit(1);
 }
+
+void print_data(double **data, int k) {
+    int i,j;
+    for(i=0;i<k;i++){
+        for(j =0; j<d;j++){
+            printf(fp, "%.4f%s",data[i][j], (j<d-1?",":""));
+        }
+        printf(fp, "\n");
+    }
+}
+
+double **parse_file(char *filename){
+    /* Allocate memory and put data from file to a 2d array */
+    FILE *data = NULL; double **arr; double num; int i,j;
+    
+    data = fopen(filename, "r");
+    if(data == NULL){
+        print_invalid_input();
+    }
+    n = count_lines(data);
+    d = count_d(data);
+    arr = allocate_data(n, d);
+    rewind(data);
+    for(i = 0; i<n; i++){
+        for(j=0; j<d; j++) {
+            fscanf(data, "%lf,", &num);
+            arr[i][j] = num;
+        }
+    }
+    fclose(data);
+    return arr;
+}
