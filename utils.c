@@ -4,7 +4,7 @@
 
 #include "utils.h"
 
-
+int n ,d;
 double distance(double *arr1, double *arr2, int d){
     double res = 0; int i; double delta; double sqr_delta;
     for (i=0; i<d; i++){
@@ -50,26 +50,39 @@ int check_is_num(char *str) {
     return 1;
 }
 
-void print_matrix(double **matrix, int n, int d){
+void print_matrix(double **matrix, int n, int d) {
     int i, j;
-    for (i = 0; i < n; i++)
-    {
-        for (j = 0; j < d; j++)
-        {
-            printf("%d\t", matrix[i][j]);
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < d; j++) {
+            printf("%fl\t", matrix[i][j]);
         }
         printf("\n");
     }
-void print_data(double **data, int k) {
-    int i,j;
-    for(i=0;i<k;i++){
-        for(j =0; j<d;j++){
-            printf(fp, "%.4f%s",data[i][j], (j<d-1?",":""));
-        }
-        printf(fp, "\n");
-    }
 }
 
+
+
+int count_lines(FILE *file) {
+    char c = 0;
+    int n = 0;
+    while ((c = fgetc(file) ) != EOF){
+        if(c=='\n')
+            n++;
+    }
+    return n;
+}
+
+int count_d(FILE *pFile) {
+    int c=0;
+    rewind(pFile);
+    d = 1;
+    while ((c = fgetc(pFile) ) != '\n' ){
+        if(c==',')
+            d++;
+    }
+    rewind(pFile);
+    return d;
+}
 double **parse_file(char *filename){
     /* Allocate memory and put data from file to a 2d array */
     FILE *data = NULL; double **arr; double num; int i,j;
