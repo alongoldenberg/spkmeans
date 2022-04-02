@@ -7,4 +7,4 @@ setup(name='spkmeans',
                         "numpy"],
       packages=find_packages(),
       description='spkmeans algorithm implementation in C',
-      ext_modules=[Extension('myspkmeans', sources=['spkmeansmodule.c'])])
+      ext_modules=[Extension('myspkmeans', sources=['spkmeansmodule.c', 'spkmeans.c'])])
