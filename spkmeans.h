@@ -6,7 +6,6 @@
 #define SPKMEANS_SPKMEANS_H
 
 #define PY_SSIZE_T_CLEAN
-#include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,5 +30,11 @@ static double **identity_matrix(int k);
 static double *get_diagonal(double **m);
 static double rotate_jacobian(double **a, double **a_tag, double **p);
 static void calc_p(double **p, int i, int j, double s, double c);
+static double **degree_to_diagonal_matrix(double *degree);
+static double **jacobi(double **a);
+int compare( const void* a, const void* b);
+static int eigengap_hueuristic(double *eigenvaleus);
+static int calculate_k(double **datapoints);
+
 
 #endif //SPKMEANS_SPKMEANS_H

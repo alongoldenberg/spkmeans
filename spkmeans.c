@@ -8,6 +8,7 @@
 int n, d;
 
 // TODO: Make sure to free all matrix
+// TODO: Check that all calloc succeeded.
 
 static double **weight_adj_matrix(double **datapoints){
 /**
@@ -82,6 +83,10 @@ static double **normalized_laplacian(double **weights, double *degree){
 static double rotate_jacobian(double **a, double **a_tag, double **p) {
     int i, j; double s, c, t; int *max; double max_value;
     max = max_off_diagonal(a);
+    if (max==0){
+        // A is already diagonal
+        return 0;
+    }
     i = max[0], j=max[1];
     max_value = a[i][j];
     t = calc_t(a, i, j);
@@ -93,32 +98,26 @@ static double rotate_jacobian(double **a, double **a_tag, double **p) {
     return 2*(pow(max_value, 2));
 }
 
-static double **jacobi(double **a, int eps){
+static double **jacobi(double **a){
 /**
  * Preform the Jacobian algorithm.
  *
  * @param a - n*n real symmetric metrix
  * @param eps - tolerance for the difference between rotation matrices
- * @return [*values, *vectors]  -  2D array containing:
- *                                    values: a pointer to a 1D array (n) containing the eigenvalues
- *                                    vectors: a pointer to a 2D array (n*n), containing the eigenvectors
+ * @return **vectors  -  2D array with the eighenvectors as columns
  */
     int k; double off_diagonal;
-    double **result, **a_tag, **p;
-    result = (double**) calloc(2,sizeof(double *));
+    double **a_tag, **p;
     a_tag = allocate_data(n, n);
     copy_matrix(a, a_tag);
     p = identity_matrix(n);
     for(k=0;k<MAX_ROTATIONS;k++){
-        off_diagonal = rotate_jacobian(a, NULL, a_tag);
-        if(off_diagonal <= eps) {
+        off_diagonal = rotate_jacobian(a, a_tag, p);
+        if(off_diagonal <= EPSILON) {
             break;
         }
     }
-    result[0] = get_diagonal(a); //A is the rotated matrix with the eigenvalues on the diagonal
-    result[1] = *p; //P after enough iterations contains eigenvectors
-    return result;
-
+  return p;
 }
 
 static double calc_c(double t){
@@ -239,33 +238,10 @@ static double *get_diagonal(double **m) {
     return diagonal;
 }
 
-/**
- For running as main:
- * */
-
-
-int main(int argc, char **argv){
-// TODO: Ofir - Pay attention that every function assumes that n and d are initialized.
-    n = 5;
-    d = 5;
-    double **w;
-    double zero = 0.0;
-    double one = 1.0;
-    double **datapoints[5][5] = {{zero,zero,one,zero,zero,zero},
-                                 {one,zero,zero,zero,zero},
-                                 {zero,zero,zero,one,one},
-                                 {zero,zero,one,zero,one},
-                                 {zero,zero, one, one, zero}};
-    w = weight_adj_matrix(datapoints);
-    print_matrix(w, n, d);
-
-
-    return 0;
-}
-
 
 
 static double **degree_to_diagonal_matrix(double *degree){
+    // Use to convert the 1D array to 2D array
     double **diagonal_degree_matrix_res;
     diagonal_degree_matrix_res = allocate_data(n, n);
     int i,j;
@@ -277,44 +253,69 @@ static double **degree_to_diagonal_matrix(double *degree){
     return diagonal_degree_matrix_res;
 }
 
+int compare( const void* a, const void* b)
+{
+    // simple compare function.
+    int int_a = * ( (int*) a );
+    int int_b = * ( (int*) b );
 
-int main(int argc, char *argv[]){
-    enum Goal {wam, ddg, lnorm, jacobi} goal;
-    char *file_name;
-    double **datapoints;
-    int k;
-    double **weight_adj_matrix_res; double *degree; double **lap_res;
-    double **diagonal_degree_matrix_res;
-    if (argc == 4) {
-        k = atoi(argv[1]);
-        goal = argv[2];
-        file_name = argv[3];
+    if ( int_a == int_b ) {
+        return 0;
     }
-    else{
-        printf("Invalid Input!");
-        return 1;
-    }
-    datapoints = parse_file(file_name);
-    switch (goal)
-    {
-        case wam:
-            weight_adj_matrix_res = weight_adj_matrix(datapoints);
-            print_data(weight_adj_matrix_res);
-            break;
-        case ddg:
-            degree = diagonal_degree_matrix(weight_adj_matrix_res);
-            diagonal_degree_matrix_res = degree_to_diagonal_matrix(degree);
-            print_data(diagonal_degree_matrix_res);
-            break;
-        case lnorm:
-            lap_res = normalized_laplacian(weight_adj_matrix_res, degree);
-            print_data(lap_res);
-            break;
-        case jacobi:
-        //need to complete;
-        default:
-            printf("Invalid Input!");
-        return 1;
-    }  
-    return 0;
+    else if ( int_a < int_b )
+    {return -1;}
+    return 1;
 }
+
+
+static int eigengap_hueuristic(double *eigenvaleus){
+/**
+ * Preform the eigengap heuristic: given a set of eigenvalues return max idx difference of sorted eigenvalues
+ *
+ * @param eigenvalues - sorted eigenvalues array
+  *@result max_diff  - the maximal difference idx in 1-(n/2) smallest eigenvalues
+ */
+    int max_diff_idx, i;
+    double max_diff = 0, diff;
+    for (i = 0; i < n / 2; i++) {
+        diff = eigenvaleus[i + 1] - eigenvaleus[i];
+        if (diff > max_diff) {
+            max_diff = diff;
+            max_diff_idx = i;
+        }
+    }
+    return max_diff_idx + 1;
+}
+
+static int calculate_k(double **datapoints){
+/**
+ * Preform the full spectral k-means algorithm, return optimal k.
+ *
+ * @param datapoints - 2D array of datapoints size n*d.
+ * @invariant - n and d are initialized.
+  *@result k - optimal k for k-means algorithm.
+ */    
+    double **weights, *degree, **laplacian, *eigenvalues;
+    int k;
+    weights = weight_adj_matrix(datapoints);
+    degree = diagonal_degree_matrix(weights);
+    laplacian = normalized_laplacian(weights, degree);
+    jacobi(laplacian); // No need to return as laplacian is diagonalized in-place.
+    eigenvalues = get_diagonal(laplacian);
+    qsort(eigenvalues, n, sizeof (double), compare);
+    k = eigengap_hueuristic(eigenvalues);
+    return k;
+}
+/**
+ For running as main:
+ * */
+
+
+//int main(int argc, char *argv[]){
+//    double **w;
+//    w = weight_adj_matrix(datapoints);
+//    print_matrix(w, n, d);
+//
+//
+//    return 0;
+//}
