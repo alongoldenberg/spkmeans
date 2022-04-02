@@ -104,11 +104,8 @@ static double rotate_jacobian(double **a, double **a_tag, double **p) {
     return 2*(pow(max_value, 2));
 }
 
-<<<<<<< Updated upstream
-static double **jacobi(double **a){
-=======
+
 static double **jacobi_function(double **a, double eps){
->>>>>>> Stashed changes
 /**
  * Preform the Jacobian algorithm.
  *
@@ -248,11 +245,6 @@ static double *get_diagonal(double **m) {
     return diagonal;
 }
 
-<<<<<<< Updated upstream
-
-
-=======
->>>>>>> Stashed changes
 static double **degree_to_diagonal_matrix(double *degree){
     // Use to convert the 1D array to 2D array
     double **diagonal_degree_matrix_res;
@@ -266,108 +258,15 @@ static double **degree_to_diagonal_matrix(double *degree){
     return diagonal_degree_matrix_res;
 }
 
+
 int compare( const void* a, const void* b)
 {
     // simple compare function.
     int int_a = * ( (int*) a );
     int int_b = * ( (int*) b );
 
-<<<<<<< Updated upstream
     if ( int_a == int_b ) {
         return 0;
-=======
-//kmeans from first and second exc:
-static double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon) {
-    double max_change; int iterations=0;
-    do{
-        max_change = update_centroids(centroids, datapoints, k, n , d);
-        iterations++;
-    } while ((max_change >= epsilon) && (iterations < max_iter));
-    return centroids;
-}
-
-static double update_centroids(double **centroids, double **datapoints, int k, int n, int d){
-    double **cumulative_sums; double *counters; int chosen_m_idx; double max_change=0; double *old_centroid; int i,j;
-    counters = (double*) calloc(k*sizeof(double), sizeof(double));
-    if (counters == NULL) {
-        print_error();
-    }
-    cumulative_sums = allocate_data(k,d);
-    for (i=0; i<n; i++){
-        chosen_m_idx = 0;
-        for (j=0; j<k; j++){
-            if (distance(centroids[j], datapoints[i]) <
-                distance(centroids[chosen_m_idx], datapoints[i])){
-                chosen_m_idx = j;
-            }
-        }
-        update_cumulative_sums(datapoints[i], cumulative_sums[chosen_m_idx]);
-        counters[chosen_m_idx] += 1;
-    }
-    /* calculate new k centroids 
-     and calculate the maximum euclidean norm ||delta_mu||:*/
-    old_centroid = (double*)calloc(n*d, sizeof(double));
-    if (old_centroid == NULL){
-        print_error();
-    }
-    for (i=0; i<k; i++){
-        for (j=0; j<d; j++){
-            old_centroid[j] = centroids[i][j];
-            centroids[i][j] = cumulative_sums[i][j] / counters[i];
-        }
-        if ((distance(old_centroid, centroids[i])) > max_change){
-            max_change = distance(old_centroid, centroids[i]);
-        }
-    }
-    free(counters);
-    free(cumulative_sums[0]);
-    free(cumulative_sums);
-    free(old_centroid);
-    return max_change;
-}
-
-static void update_cumulative_sums(double *arr, double *cumulative_sum){
-    int i;
-    for (i=0; i<d; i++){
-        cumulative_sum[i] += arr[i];
-    }
-}
-
-
-
-int main(int argc, char *argv[]){
-    
-
-//     n = 5;
-//     d = 5;
-//     double **w;
-//     double zero = 0.0;
-//     double one = 1.0;
-//     double **datapoints[5][5] = {{zero,zero,one,zero,zero,zero},
-//                                  {one,zero,zero,zero,zero},
-//                                  {zero,zero,zero,one,one},
-//                                  {zero,zero,one,zero,one},
-//                                  {zero,zero, one, one, zero}};
-//     w = weight_adj_matrix(datapoints);
-//     print_matrix(w, n, d);
-
-
-//     return 0;
-// }
-
-
-    enum Goal {wam, ddg, lnorm, jacobi} goal;
-    char *file_name;
-    double **datapoints;
-    int k;
-    double **weight_adj_matrix_res; double *degree; double **lap_res;
-    double **diagonal_degree_matrix_res;
-    double **jacobi_res;
-    if (argc == 4) {
-        k = atoi(argv[1]);
-        goal = argv[2];
-        file_name = argv[3];
->>>>>>> Stashed changes
     }
     else if ( int_a < int_b )
     {return -1;}
@@ -391,9 +290,9 @@ static int eigengap_hueuristic(double *eigenvaleus){
             max_diff_idx = i;
         }
     }
-<<<<<<< Updated upstream
     return max_diff_idx + 1;
 }
+
 
 static int calculate_k(double **datapoints){
 /**
@@ -413,7 +312,80 @@ static int calculate_k(double **datapoints){
     qsort(eigenvalues, n, sizeof (double), compare);
     k = eigengap_hueuristic(eigenvalues);
     return k;
-=======
+}
+
+
+/*kmeans from first and second exc:*/
+static double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon) {
+    double max_change; int iterations=0;
+    do{
+        max_change = update_centroids(centroids, datapoints, k, n , d);
+        iterations++;
+    } while ((max_change >= epsilon) && (iterations < max_iter));
+    return centroids;
+}
+
+static double update_centroids(double **centroids, double **datapoints, int k, int n, int d){
+    double **cumulative_sums; double *counters; int chosen_m_idx; double max_change=0; double *old_centroid; int i,j;
+    counters = (double*) calloc(k*sizeof(double), sizeof(double));
+    if (counters == NULL) {
+        print_error();
+    }
+    cumulative_sums = allocate_data(k,d);
+    for (i=0; i<n; i++){
+        chosen_m_idx = 0;
+        for (j=0; j<k; j++){
+            if (distance(centroids[j], datapoints[i], d) < distance(centroids[chosen_m_idx], datapoints[i], d)){
+                chosen_m_idx = j;
+            }
+        }
+        update_cumulative_sums(datapoints[i], cumulative_sums[chosen_m_idx]);
+        counters[chosen_m_idx] += 1;
+    }
+    /* calculate new k centroids 
+     and calculate the maximum euclidean norm ||delta_mu||:*/
+    old_centroid = (double*)calloc(n*d, sizeof(double));
+    if (old_centroid == NULL){
+        print_error();
+    }
+    for (i=0; i<k; i++){
+        for (j=0; j<d; j++){
+            old_centroid[j] = centroids[i][j];
+            centroids[i][j] = cumulative_sums[i][j] / counters[i];
+        }
+        if ((distance(old_centroid, centroids[i], d)) > max_change){
+            max_change = distance(old_centroid, centroids[i], d);
+        }
+    }
+    free(counters);
+    free(cumulative_sums[0]);
+    free(cumulative_sums);
+    free(old_centroid);
+    return max_change;
+}
+
+static void update_cumulative_sums(double *arr, double *cumulative_sum){
+    int i;
+    for (i=0; i<d; i++){
+        cumulative_sum[i] += arr[i];
+    }
+}
+
+
+int main(int argc, char *argv[]){
+    
+    enum Goal {wam, ddg, lnorm, jacobi} goal;
+    char *file_name;
+    double **datapoints;
+    int k;
+    double **weight_adj_matrix_res; double *degree; double **lap_res;
+    double **diagonal_degree_matrix_res;
+    double **jacobi_res;
+    if (argc == 4) {
+        k = atoi(argv[1]);
+        goal = argv[2];
+        file_name = argv[3];
+    }
     datapoints = parse_file(file_name);
     weight_adj_matrix_res = weight_adj_matrix(datapoints);
     degree = diagonal_degree_matrix(weight_adj_matrix_res);
@@ -431,7 +403,7 @@ static int calculate_k(double **datapoints){
             print_data(lap_res);
             break;
         case jacobi:
-            jacobi_res = jacobi_function(data, EPSILON);
+            jacobi_res = jacobi_function(datapoints, EPSILON);
             print_data(degree_to_diagonal_matrix(jacobi_res[0]));
             print_data(jacobi_res[1]);
         default:
@@ -439,8 +411,30 @@ static int calculate_k(double **datapoints){
         return 1;
     }  
     return 0;
->>>>>>> Stashed changes
-}
+
+
+
+
+
+
+/*relvant?*/
+//     n = 5;
+//     d = 5;
+//     double **w;
+//     double zero = 0.0;
+//     double one = 1.0;
+//     double **datapoints[5][5] = {{zero,zero,one,zero,zero,zero},
+//                                  {one,zero,zero,zero,zero},
+//                                  {zero,zero,zero,one,one},
+//                                  {zero,zero,one,zero,one},
+//                                  {zero,zero, one, one, zero}};
+//     w = weight_adj_matrix(datapoints);
+//     print_matrix(w, n, d);
+
+
+//     return 0;
+// }
+
 /**
  For running as main:
  * */

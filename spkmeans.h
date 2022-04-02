@@ -33,7 +33,6 @@ static double rotate_jacobian(double **a, double **a_tag, double **p);
 static double **jacobi_function(double **a, double eps);
 static void calc_p(double **p, int i, int j, double s, double c);
 static double **degree_to_diagonal_matrix(double *degree);
-static double **jacobi(double **a);
 int compare( const void* a, const void* b);
 static int eigengap_hueuristic(double *eigenvaleus);
 static int calculate_k(double **datapoints);
