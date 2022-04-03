@@ -14,6 +14,12 @@ typedef struct {
 
 // TODO: Make sure to free all matrix
 
+static void init_d_and_n (int size_n, int size_d){
+    n = size_n;
+    d = size_d;
+}
+
+
 static double **weight_adj_matrix(double **datapoints){
 /**
  * Calculate Weights Matrix
@@ -105,11 +111,12 @@ static double rotate_jacobian(double **a, double **a_tag, double **p) {
     return 2*(pow(max_value, 2));
 }
 
-static double **jacobi(double **a){
+
+static double **jacobi_function(double **a, double eps){
 /**
  * Preform the Jacobian algorithm.
  *
- * @param a - n*n real symmetric metrix
+ * @param a - n*n real symmetric matrix
  * @param eps - tolerance for the difference between rotation matrices
  * @return **vectors  -  2D array with the eighenvectors as columns
  */
@@ -265,6 +272,7 @@ static double **degree_to_diagonal_matrix(double *degree){
     return diagonal_degree_matrix_res;
 }
 
+
 int idx_cmp( const void* a, const void* b)
 {
     // Sort indexed double array
@@ -298,6 +306,51 @@ static int eigengap_hueuristic(double *eigenvaleus){
     }
     return max_diff_idx + 1;
 }
+static void sort_eigenvalues_and_vectors(double *eigenvalues, double **eigenvectors,
+                                         double * s_eigenvalues, double ** s_eigenvectors){
+    indexed_double *eigenvalues_idx;
+    int i;
+    eigenvalues_idx = (indexed_double *) calloc(n, sizeof (indexed_double));
+    if (eigenvalues_idx == NULL) {
+        print_error();
+    }
+    for(i = 0; i<n; i++){
+        eigenvalues_idx[i].i = i;
+        eigenvalues_idx[i].v = eigenvalues[i];
+    }
+    qsort(eigenvalues_idx, n, sizeof (eigenvalues_idx[0]), idx_cmp);
+    for(i = 0; i<n; i++){
+        s_eigenvalues[i] = eigenvalues[eigenvalues_idx[i].i];
+        s_eigenvectors[i] = eigenvectors[eigenvalues_idx[i].i];
+    }
+    free(eigenvalues_idx);
+}
+
+static double **calculate_T(double **eigenvectors, int k){
+    double **T, *norms, sum;
+    int i,j;
+    T = allocate_data(n, k);
+    norms = (double *) calloc(k, sizeof (double));
+    if (norms == NULL) {
+        print_error();
+    }
+    // Calculate norms:
+    for (j=0;j<k;j++){
+        sum = 0;
+        for(i=0;i<n;i++){
+            sum+= pow(eigenvectors[i][j], 2);
+        }
+        norms[j] = sqrt(sum);
+    }
+    for (i=0;i<n;i++){
+        for(j=0;j<k;j++){
+            T[i][j] = (eigenvectors[i][j] / norms[j]);
+        }
+    }
+    free(norms);
+    return T;
+}
+
 
 static void sort_eigenvalues_and_vectors(double *eigenvalues, double **eigenvectors,
                                          double * s_eigenvalues, double ** s_eigenvectors){
@@ -378,16 +431,101 @@ static double **spectral_clustrering(double **datapoints){
     free(eigenvalues);
     return T;
 }
-/**
- For running as main:
- * */
 
 
-//int main(int argc, char *argv[]){
-//    double **w;
-//    w = weight_adj_matrix(datapoints);
-//    print_matrix(w, n, d);
-//
-//
-//    return 0;
-//}
+/*kmeans from first and second exc:*/
+static double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon) {
+    double max_change; int iterations=0;
+    do{
+        max_change = update_centroids(centroids, datapoints, k, n , d);
+        iterations++;
+    } while ((max_change >= epsilon) && (iterations < max_iter));
+    return centroids;
+}
+
+static double update_centroids(double **centroids, double **datapoints, int k, int n, int d){
+    double **cumulative_sums; double *counters; int chosen_m_idx; double max_change=0; double *old_centroid; int i,j;
+    counters = (double*) calloc(k*sizeof(double), sizeof(double));
+    if (counters == NULL) {
+        print_error();
+    }
+    cumulative_sums = allocate_data(k,d);
+    for (i=0; i<n; i++){
+        chosen_m_idx = 0;
+        for (j=0; j<k; j++){
+            if (distance(centroids[j], datapoints[i], d) < distance(centroids[chosen_m_idx], datapoints[i], d)){
+                chosen_m_idx = j;
+            }
+        }
+        update_cumulative_sums(datapoints[i], cumulative_sums[chosen_m_idx]);
+        counters[chosen_m_idx] += 1;
+    }
+    /* calculate new k centroids 
+     and calculate the maximum euclidean norm ||delta_mu||:*/
+    old_centroid = (double*)calloc(n*d, sizeof(double));
+    if (old_centroid == NULL){
+        print_error();
+    }
+    for (i=0; i<k; i++){
+        for (j=0; j<d; j++){
+            old_centroid[j] = centroids[i][j];
+            centroids[i][j] = cumulative_sums[i][j] / counters[i];
+        }
+        if ((distance(old_centroid, centroids[i], d)) > max_change){
+            max_change = distance(old_centroid, centroids[i], d);
+        }
+    }
+    free(counters);
+    free(cumulative_sums[0]);
+    free(cumulative_sums);
+    free(old_centroid);
+    return max_change;
+}
+
+static void update_cumulative_sums(double *arr, double *cumulative_sum){
+    int i;
+    for (i=0; i<d; i++){
+        cumulative_sum[i] += arr[i];
+    }
+}
+
+
+int main(int argc, char *argv[]){
+    
+    enum Goal {wam, ddg, lnorm, jacobi} goal;
+    char *file_name;
+    double **datapoints;
+    int k;
+    double **weight_adj_matrix_res; double *degree; double **lap_res;
+    double **diagonal_degree_matrix_res;
+    double **jacobi_res;
+    if (argc == 4) {
+        k = atoi(argv[1]);
+        goal = argv[2];
+        file_name = argv[3];
+    }
+    datapoints = parse_file(file_name);
+    weight_adj_matrix_res = weight_adj_matrix(datapoints);
+    degree = diagonal_degree_matrix(weight_adj_matrix_res);
+    switch (goal)
+    {
+        case wam:
+            print_data(weight_adj_matrix_res);
+            break;
+        case ddg:
+            diagonal_degree_matrix_res = degree_to_diagonal_matrix(degree);
+            print_data(diagonal_degree_matrix_res);
+            break;
+        case lnorm:
+            lap_res = normalized_laplacian(weight_adj_matrix_res, degree);
+            print_data(lap_res);
+            break;
+        case jacobi:
+            jacobi_res = jacobi_function(datapoints, EPSILON);
+            print_data(degree_to_diagonal_matrix(jacobi_res[0]));
+            print_data(jacobi_res[1]);
+        default:
+            printf("Invalid Input!");
+        return 1;
+    }  
+    return 0;
