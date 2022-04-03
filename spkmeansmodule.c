@@ -63,7 +63,7 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
     weight_adj_matrix_res = weight_adj_matrix(datapoints);
     degree = diagonal_degree_matrix(weight_adj_matrix_res);
     lap = normalized_laplacian(weight_adj_matrix_res, degree);
-    T = find_T(datapoints);
+    T = spectral_clustrering(datapoints);
     k = calculate_k(datapoints);
     //cases:
     switch (my_goal_c_type)
