@@ -13,7 +13,6 @@ typedef struct {
 } indexed_double;
 
 // TODO: Make sure to free all matrix
-// TODO: Check that all calloc succeeded.
 
 static void init_d_and_n (int size_n, int size_d){
     n = size_n;
@@ -56,7 +55,7 @@ static double *diagonal_degree_matrix(double **weights){
     // Note: this function returns a 1D array but is considered as 2D with A[i][i] = m[i] with 0 else.
     double sum; double *diagonal; int i,j;
     diagonal = (double*) calloc(n, sizeof(double));
-        if (diagonal == NULL) {
+    if (diagonal == NULL) {
         print_error();
     }
     for (i=0;i<n;i++){
@@ -132,8 +131,8 @@ static double **jacobi_function(double **a, double eps){
             break;
         }
     }
-  free(a_tag);
-  return p;
+    free(a_tag);
+    return p;
 }
 
 static double calc_c(double t){
@@ -170,7 +169,7 @@ static int *max_off_diagonal(double **m){
  */
     int *res; double max = 0; int i,j;
     res =  (int*) calloc(2, sizeof(int));
-        if (res == NULL) {
+    if (res == NULL) {
         print_error();
     }
     for(i=0;i<n;i++){
@@ -251,7 +250,7 @@ static double *get_diagonal(double **m) {
     // return an N*N identity matrix
     double *diagonal; int i;
     diagonal = (double *)calloc(n, sizeof(double ));
-        if (diagonal == NULL) {
+    if (diagonal == NULL) {
         print_error();
     }
     for (i = 0; i < n; i++) {
@@ -274,11 +273,8 @@ static double **degree_to_diagonal_matrix(double *degree){
 }
 
 
-
-
-
-
-int idx_cmp( const void* a, const void* b){
+int idx_cmp( const void* a, const void* b)
+{
     // Sort indexed double array
     indexed_double *x = (indexed_double *) a;
     indexed_double *y = (indexed_double *) b;
@@ -310,6 +306,52 @@ static int eigengap_hueuristic(double *eigenvaleus){
     }
     return max_diff_idx + 1;
 }
+static void sort_eigenvalues_and_vectors(double *eigenvalues, double **eigenvectors,
+                                         double * s_eigenvalues, double ** s_eigenvectors){
+    indexed_double *eigenvalues_idx;
+    int i;
+    eigenvalues_idx = (indexed_double *) calloc(n, sizeof (indexed_double));
+    if (eigenvalues_idx == NULL) {
+        print_error();
+    }
+    for(i = 0; i<n; i++){
+        eigenvalues_idx[i].i = i;
+        eigenvalues_idx[i].v = eigenvalues[i];
+    }
+    qsort(eigenvalues_idx, n, sizeof (eigenvalues_idx[0]), idx_cmp);
+    for(i = 0; i<n; i++){
+        s_eigenvalues[i] = eigenvalues[eigenvalues_idx[i].i];
+        s_eigenvectors[i] = eigenvectors[eigenvalues_idx[i].i];
+    }
+    free(eigenvalues_idx);
+}
+
+static double **calculate_T(double **eigenvectors, int k){
+    double **T, *norms, sum;
+    int i,j;
+    T = allocate_data(n, k);
+    norms = (double *) calloc(k, sizeof (double));
+    if (norms == NULL) {
+        print_error();
+    }
+    // Calculate norms:
+    for (j=0;j<k;j++){
+        sum = 0;
+        for(i=0;i<n;i++){
+            sum+= pow(eigenvectors[i][j], 2);
+        }
+        norms[j] = sqrt(sum);
+    }
+    for (i=0;i<n;i++){
+        for(j=0;j<k;j++){
+            T[i][j] = (eigenvectors[i][j] / norms[j]);
+        }
+    }
+    free(norms);
+    return T;
+}
+
+
 static void sort_eigenvalues_and_vectors(double *eigenvalues, double **eigenvectors,
                                          double * s_eigenvalues, double ** s_eigenvectors){
     indexed_double *eigenvalues_idx;
