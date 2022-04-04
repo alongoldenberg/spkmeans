@@ -54,10 +54,28 @@ void print_matrix(double **matrix, int n, int d) {
     int i, j;
     for (i = 0; i < n; i++) {
         for (j = 0; j < d; j++) {
-            printf("%fl\t", matrix[i][j]);
+            if(j==(d-1)){
+                printf("%.4f", matrix[i][j]);
+            }
+            else{
+                printf("%.4f,", matrix[i][j]);
+            }
         }
         printf("\n");
     }
+}
+
+void print_arr(double *arr, int n) {
+    int i;
+    for (i = 0; i < n; i++) {
+            if(i==(n-1)){
+                printf("%.4f", arr[i]);
+            }
+            else{
+                printf("%.4f,", arr[i]);
+            }
+        }
+    printf("\n");
 }
 
 
@@ -83,24 +101,4 @@ int count_d(FILE *pFile) {
     rewind(pFile);
     return d;
 }
-double **parse_file(char *filename){
-    /* Allocate memory and put data from file to a 2d array */
-    FILE *data = NULL; double **arr; double num; int i,j;
-    
-    data = fopen(filename, "r");
-    if(data == NULL){
-        print_invalid_input();
-    }
-    n = count_lines(data);
-    d = count_d(data);
-    arr = allocate_data(n, d);
-    rewind(data);
-    for(i = 0; i<n; i++){
-        for(j=0; j<d; j++) {
-            fscanf(data, "%lf,", &num);
-            arr[i][j] = num;
-        }
-    }
-    fclose(data);
-    return arr;
-}
+
