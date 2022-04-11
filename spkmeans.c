@@ -39,7 +39,10 @@ double **parse_file(char *filename, int *n, int *d){
 }
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static double **weight_adj_matrix(double **datapoints, int n, int d){
 /**
  * Calculate Weights Matrix
@@ -65,7 +68,10 @@ static double **weight_adj_matrix(double **datapoints, int n, int d){
 }
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static double *diagonal_degree_matrix(double **weights, char sq, int n){
 /**
  * Calculate degree matrix
@@ -93,7 +99,10 @@ static double *diagonal_degree_matrix(double **weights, char sq, int n){
     return diagonal;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static double **normalized_laplacian(double **weights, const double *degree, int n){
 /**
  * Calculate normalized laplacian matrix
@@ -118,7 +127,10 @@ static double **normalized_laplacian(double **weights, const double *degree, int
     return lap;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static double rotate_jacobian(double **a, double **a_tag, double **p, int n) {
     int i, j; double s, c, t; int *max; double max_value;
     max = max_off_diagonal(a, n);
@@ -170,6 +182,10 @@ static double calc_c(double t){
 
 
 static double calc_t(double **m, int i, int j){
+<<<<<<< HEAD
+=======
+/** calculates value of t*/
+>>>>>>> fix_warnings
     double theta, t;
     theta = (m[j][j] - m[i][i]) / (2*m[i][j]);
     t = sign(theta) / (fabs(theta) + sqrt(pow(theta, 2) + 1));
@@ -213,7 +229,10 @@ static int *max_off_diagonal(double **m, int n){
     return res;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static void calc_a_tag(double **a, double **a_tag, double s, double c, int i, int j, int n){
 /**
  * Calculates A' and returns the off-diagonal difference between A and A'
@@ -240,7 +259,10 @@ static void calc_a_tag(double **a, double **a_tag, double s, double c, int i, in
     a_tag[j][i] = 0;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static void calc_p(double **p, int i, int j, double s, double c, int n){
 /**
  * Calculates Rotation Matrices in place using heuristics
@@ -258,7 +280,10 @@ static void calc_p(double **p, int i, int j, double s, double c, int n){
     }
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static void copy_matrix(double **m, double **c, int n) {
     int i, j;
     for (i = 0; i < n; i++) {
@@ -268,7 +293,10 @@ static void copy_matrix(double **m, double **c, int n) {
     }
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static double **identity_matrix(int n) {
     double **identity; int i;
     identity = allocate_data(n, n);
@@ -278,7 +306,10 @@ static double **identity_matrix(int n) {
     return identity;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static double *get_diagonal(double **m, int n) {
     double *diagonal; int i;
     diagonal = (double *)calloc(n, sizeof(double ));
@@ -291,7 +322,10 @@ static double *get_diagonal(double **m, int n) {
     return diagonal;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static double **degree_to_diagonal_matrix(const double *degree, int n){
     double **diagonal_degree_matrix_res;
     int i;
@@ -305,7 +339,10 @@ static double **degree_to_diagonal_matrix(const double *degree, int n){
 
 int idx_cmp( const void* a, const void* b)
 {
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
     indexed_double *x = (indexed_double *) a;
     indexed_double *y = (indexed_double *) b;
 
@@ -318,7 +355,10 @@ int idx_cmp( const void* a, const void* b)
 }
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static int eigengap_hueuristic(const double *eigenvaleus, int n){
 /**
  * Preform the eigengap heuristic: given a set of eigenvalues return max idx difference of sorted eigenvalues
@@ -358,7 +398,10 @@ static void sort_eigenvalues_and_vectors(const double *eigenvalues, double **eig
     free(eigenvalues_idx);
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static double **calculate_T(double **eigenvectors, int k, int n){
     double **T, *norms, sum;
     int i,j;
@@ -367,7 +410,10 @@ static double **calculate_T(double **eigenvectors, int k, int n){
     if (norms == NULL) {
         print_error();
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
     for (j=0;j<k;j++){
         sum = 0;
         for(i=0;i<n;i++){
@@ -385,7 +431,10 @@ static double **calculate_T(double **eigenvectors, int k, int n){
 }
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static double **spectral_clustrering(double **datapoints, int n, int d){
 /**
  * Preform the full spectral k-means algorithm, return optimal k.
@@ -422,7 +471,10 @@ static double **spectral_clustrering(double **datapoints, int n, int d){
 
 
 /*kmeans from first and second exc:*/
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon, int n, int d) {
     double max_change; int iterations=0;
     do{
@@ -432,7 +484,10 @@ static double **kmeans(double **datapoints, double **centroids, int k, int max_i
     return centroids;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static double update_centroids(double **centroids, double **datapoints, int k, int n, int d){
     double **cumulative_sums; double *counters; int chosen_m_idx; double max_change=0; double *old_centroid; int i,j;
     counters = (double*) calloc(k*sizeof(double), sizeof(double));
@@ -472,7 +527,10 @@ static double update_centroids(double **centroids, double **datapoints, int k, i
     return max_change;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
 static void update_cumulative_sums(const double *arr, double *cumulative_sum, int d){
     int i;
     for (i=0; i<d; i++){
@@ -516,7 +574,10 @@ int main(int argc, char *argv[]) {
         print_arr(eigenvalues, n);
         print_matrix(eigen_vectors, n, n);
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> fix_warnings
     else if(strcmp(goal, "spk") == 0) {
         eigen_vectors = spectral_clustrering(datapoints, n, d);
         print_matrix(eigen_vectors, n, n);
