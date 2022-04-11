@@ -11,5 +11,6 @@ static void print_error();
 void print_invalid_input();
 int check_is_num(char *str);
 void print_matrix(double **matrix, int n, int d);
+void print_arr(double *arr, int n);
 
 #endif //SPKMEANS_UTILS_H
