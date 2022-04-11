@@ -1,10 +1,8 @@
-//
-// Created by Alon Goldenberg on 07/03/2022.
-//
-
+/**
+* Created by Alon Goldenberg & Ofir Nissan.
+*/
 #include "utils.h"
 
-int n ,d;
 double distance(double *arr1, double *arr2, int d){
     double res = 0; int i; double delta; double sqr_delta;
     for (i=0; i<d; i++){
@@ -91,7 +89,7 @@ int count_lines(FILE *file) {
 }
 
 int count_d(FILE *pFile) {
-    int c=0;
+    int d, c=0;
     rewind(pFile);
     d = 1;
     while ((c = fgetc(pFile) ) != '\n' ){

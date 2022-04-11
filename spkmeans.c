@@ -1,20 +1,17 @@
-//
-// Created by Alon Goldenberg & Ofir Nissan.
-//
+/**
+* Created by Alon Goldenberg & Ofir Nissan.
+*/
 
 #include "spkmeans.h"
 #include "utils.c"
-
-int n, d;
 
 typedef struct {
     int i;
     double v;
 } indexed_double;
 
-// TODO: Make sure to free all matrix
 
-double **parse_file(char *filename){
+double **parse_file(char *filename, int *n, int *d){
     /* Allocate memory and put data from file to a 2d array */
     FILE *data = NULL; double **arr; double num; int i,j;
 
@@ -22,12 +19,12 @@ double **parse_file(char *filename){
     if(data == NULL){
         print_invalid_input();
     }
-    n = count_lines(data);
-    d = count_d(data);
-    arr = allocate_data(n, d);
+    *n = count_lines(data);
+    *d = count_d(data);
+    arr = allocate_data(*n, *d);
     rewind(data);
-    for(i = 0; i<n; i++){
-        for(j=0; j<d; j++) {
+    for(i = 0; i<*n; i++){
+        for(j=0; j<*d; j++) {
             fscanf(data, "%lf,", &num);
             arr[i][j] = num;
         }
@@ -37,7 +34,7 @@ double **parse_file(char *filename){
 }
 
 
-static double **weight_adj_matrix(double **datapoints){
+static double **weight_adj_matrix(double **datapoints, int n, int d){
 /**
  * Calculate Weights Matrix
  *
@@ -62,15 +59,15 @@ static double **weight_adj_matrix(double **datapoints){
 }
 
 
-static double *diagonal_degree_matrix(double **weights, char sq){
+static double *diagonal_degree_matrix(double **weights, char sq, int n){
 /**
  * Calculate degree matrix
  *
  * @param weights - n*n weights matrix
- * @param sq - if !=0, returm D**-0.5
+ * @param sq - if !=0, return D**-0.5
  * @return degree array - n sized array where d[i] = degree of datapoint i
+ * Note: this function returns a 1D array but is considered as 2D with A[i][i] = m[i] with 0 else.
  */
-    // Note: this function returns a 1D array but is considered as 2D with A[i][i] = m[i] with 0 else.
     double sum; double *diagonal; int i,j;
     diagonal = (double*) calloc(n, sizeof(double));
     if (diagonal == NULL) {
@@ -89,7 +86,7 @@ static double *diagonal_degree_matrix(double **weights, char sq){
     return diagonal;
 }
 
-static double **normalized_laplacian(double **weights, const double *degree){
+static double **normalized_laplacian(double **weights, const double *degree, int n){
 /**
  * Calculate normalized laplacian matrix
  *
@@ -113,26 +110,25 @@ static double **normalized_laplacian(double **weights, const double *degree){
     return lap;
 }
 
-static double rotate_jacobian(double **a, double **a_tag, double **p) {
+static double rotate_jacobian(double **a, double **a_tag, double **p, int n) {
     int i, j; double s, c, t; int *max; double max_value;
-    max = max_off_diagonal(a);
+    max = max_off_diagonal(a, n);
     i = max[0], j=max[1];
     if (a[i][j]==0){
-        // A is already diagonal
         return 0;
     }
     max_value = a[i][j];
     t = calc_t(a, i, j);
     c = calc_c(t);
     s = c * t;
-    calc_a_tag(a, a_tag, s, c, i, j);
-    calc_p(p, i, j, s, c);
-    copy_matrix(a_tag, a);
+    calc_a_tag(a, a_tag, s, c, i, j, n);
+    calc_p(p, i, j, s, c, n);
+    copy_matrix(a_tag, a, n);
     return 2*(pow(max_value, 2));
 }
 
 
-static double **jacobi_function(double **a, double eps){
+static double **jacobi_function(double **a, double eps, int n){
 /**
  * Preform the Jacobian algorithm.
  *
@@ -143,10 +139,10 @@ static double **jacobi_function(double **a, double eps){
     int k; double off_diagonal;
     double **a_tag, **p;
     a_tag = allocate_data(n, n);
-    copy_matrix(a, a_tag);
+    copy_matrix(a, a_tag, n);
     p = identity_matrix(n);
     for(k=0;k<MAX_ROTATIONS;k++){
-        off_diagonal = rotate_jacobian(a, a_tag, p);
+        off_diagonal = rotate_jacobian(a, a_tag, p, n);
         if(off_diagonal <= eps) {
             break;
         }
@@ -156,14 +152,14 @@ static double **jacobi_function(double **a, double eps){
 }
 
 static double calc_c(double t){
-// calculates value of c
+/**calculates value of c*/
     double c;
     c =  1 / sqrt((pow(t, 2) + 1));
     return c;
 }
 
 static double calc_t(double **m, int i, int j){
-    // calculates value of t
+/** calculates value of t*/
     double theta, t;
     theta = (m[j][j] - m[i][i]) / (2*m[i][j]);
     t = sign(theta) / (fabs(theta) + sqrt(pow(theta, 2) + 1));
@@ -171,7 +167,7 @@ static double calc_t(double **m, int i, int j){
 }
 
 static double sign(double x) {
-    // given double returns it's sign. Note: sign(0) = 1.
+/** given double returns it's sign. Note: sign(0) = 1. */
     double s;
     if(x == 0){
         return 1;
@@ -180,7 +176,7 @@ static double sign(double x) {
     return s;
 }
 
-static int *max_off_diagonal(double **m){
+static int *max_off_diagonal(double **m, int n){
 /**
  * Finds the indices of the maximum double in a matrix
  *
@@ -189,12 +185,11 @@ static int *max_off_diagonal(double **m){
  */
     int *res; double max = 0; int i,j;
     res =  (int*) calloc(2, sizeof(int));
-    // Just sanity check if the matrix is already all zeroes:
-    res[0] = 0;
-    res[1] = 1;
     if (res == NULL) {
         print_error();
     }
+    res[0] = 0;
+    res[1] = 1;
     for(i=0;i<n;i++){
         for(j=i+1;j<n;j++){
             if (fabs(m[i][j]) > fabs(max)){
@@ -207,7 +202,7 @@ static int *max_off_diagonal(double **m){
     return res;
 }
 
-static void calc_a_tag(double **a, double **a_tag, double s, double c, int i, int j){
+static void calc_a_tag(double **a, double **a_tag, double s, double c, int i, int j, int n){
 /**
  * Calculates A' and returns the off-diagonal difference between A and A'
  *
@@ -218,7 +213,7 @@ static void calc_a_tag(double **a, double **a_tag, double s, double c, int i, in
  * @return off - off-diagonal difference between A and A', based on
  */
     int r;
-    copy_matrix(a, a_tag);
+    copy_matrix(a, a_tag, n);
     for(r=0; r<n; r++){
         if (r!=i && r!=j){
             a_tag[r][i] = c*a[r][i] - s*a[r][j];
@@ -233,7 +228,7 @@ static void calc_a_tag(double **a, double **a_tag, double s, double c, int i, in
     a_tag[j][i] = 0;
 }
 
-static void calc_p(double **p, int i, int j, double s, double c){
+static void calc_p(double **p, int i, int j, double s, double c, int n){
 /**
  * Calculates Rotation Matrices in place using heuristics
  *
@@ -250,8 +245,7 @@ static void calc_p(double **p, int i, int j, double s, double c){
     }
 }
 
-static void copy_matrix(double **m, double **c) {
-    // Deep copy a n*n matrix
+static void copy_matrix(double **m, double **c, int n) {
     int i, j;
     for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
@@ -260,18 +254,16 @@ static void copy_matrix(double **m, double **c) {
     }
 }
 
-static double **identity_matrix(int k) {
-    // return an N*N identity matrix
+static double **identity_matrix(int n) {
     double **identity; int i;
     identity = allocate_data(n, n);
-    for (i = 0; i < k; i++) {
+    for (i = 0; i < n; i++) {
         identity[i][i] = 1;
     }
     return identity;
 }
 
-static double *get_diagonal(double **m) {
-    // return an N*N identity matrix
+static double *get_diagonal(double **m, int n) {
     double *diagonal; int i;
     diagonal = (double *)calloc(n, sizeof(double ));
     if (diagonal == NULL) {
@@ -283,11 +275,10 @@ static double *get_diagonal(double **m) {
     return diagonal;
 }
 
-static double **degree_to_diagonal_matrix(double *degree){
-    // Use to convert the 1D array to 2D array
+static double **degree_to_diagonal_matrix(const double *degree, int n){
     double **diagonal_degree_matrix_res;
-    diagonal_degree_matrix_res = allocate_data(n, n);
     int i;
+    diagonal_degree_matrix_res = allocate_data(n, n);
     for (i=0 ; i<n; i++){
             diagonal_degree_matrix_res[i][i] = degree[i];
     }
@@ -297,7 +288,6 @@ static double **degree_to_diagonal_matrix(double *degree){
 
 int idx_cmp( const void* a, const void* b)
 {
-    // Sort indexed double array
     indexed_double *x = (indexed_double *) a;
     indexed_double *y = (indexed_double *) b;
 
@@ -310,7 +300,7 @@ int idx_cmp( const void* a, const void* b)
 }
 
 
-static int eigengap_hueuristic(const double *eigenvaleus){
+static int eigengap_hueuristic(const double *eigenvaleus, int n){
 /**
  * Preform the eigengap heuristic: given a set of eigenvalues return max idx difference of sorted eigenvalues
  *
@@ -329,7 +319,7 @@ static int eigengap_hueuristic(const double *eigenvaleus){
     return max_diff_idx + 1;
 }
 static void sort_eigenvalues_and_vectors(const double *eigenvalues, double **eigenvectors,
-                                         double * s_eigenvalues, double ** s_eigenvectors){
+                                         double * s_eigenvalues, double ** s_eigenvectors, int n){
     indexed_double *eigenvalues_idx;
     int i;
     eigenvalues_idx = (indexed_double *) calloc(n, sizeof (indexed_double));
@@ -348,7 +338,7 @@ static void sort_eigenvalues_and_vectors(const double *eigenvalues, double **eig
     free(eigenvalues_idx);
 }
 
-static double **calculate_T(double **eigenvectors, int k){
+static double **calculate_T(double **eigenvectors, int k, int n){
     double **T, *norms, sum;
     int i,j;
     T = allocate_data(n, k);
@@ -356,7 +346,6 @@ static double **calculate_T(double **eigenvectors, int k){
     if (norms == NULL) {
         print_error();
     }
-    // Calculate norms:
     for (j=0;j<k;j++){
         sum = 0;
         for(i=0;i<n;i++){
@@ -374,7 +363,7 @@ static double **calculate_T(double **eigenvectors, int k){
 }
 
 
-static double **spectral_clustrering(double **datapoints){
+static double **spectral_clustrering(double **datapoints, int n, int d){
 /**
  * Preform the full spectral k-means algorithm, return optimal k.
  *
@@ -390,14 +379,14 @@ static double **spectral_clustrering(double **datapoints){
         print_error();
     }
     s_eigenvectors = allocate_data(n, n);
-    weights = weight_adj_matrix(datapoints);
-    degree = diagonal_degree_matrix(weights, 1);
-    laplacian = normalized_laplacian(weights, degree);
-    eigenvectors = jacobi_function(laplacian, EPSILON);
-    eigenvalues = get_diagonal(laplacian);
-    sort_eigenvalues_and_vectors(eigenvalues, eigenvectors, s_eigenvalues, s_eigenvectors);
-    k = eigengap_hueuristic(s_eigenvalues);
-    T = calculate_T(s_eigenvectors, k);
+    weights = weight_adj_matrix(datapoints, n, d);
+    degree = diagonal_degree_matrix(weights, 1, n);
+    laplacian = normalized_laplacian(weights, degree, n);
+    eigenvectors = jacobi_function(laplacian, EPSILON, n);
+    eigenvalues = get_diagonal(laplacian, n);
+    sort_eigenvalues_and_vectors(eigenvalues, eigenvectors, s_eigenvalues, s_eigenvectors, n);
+    k = eigengap_hueuristic(s_eigenvalues, n);
+    T = calculate_T(s_eigenvectors, k, n);
     free(s_eigenvalues);
     free(s_eigenvectors);
     free(weights);
@@ -410,16 +399,16 @@ static double **spectral_clustrering(double **datapoints){
 
 
 /*kmeans from first and second exc:*/
-static double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon) {
+static double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon, int n, int d) {
     double max_change; int iterations=0;
     do{
-        max_change = update_centroids(centroids, datapoints, k);
+        max_change = update_centroids(centroids, datapoints, k, n, d);
         iterations++;
     } while ((max_change >= epsilon) && (iterations < max_iter));
     return centroids;
 }
 
-static double update_centroids(double **centroids, double **datapoints, int k){
+static double update_centroids(double **centroids, double **datapoints, int k, int n, int d){
     double **cumulative_sums; double *counters; int chosen_m_idx; double max_change=0; double *old_centroid; int i,j;
     counters = (double*) calloc(k*sizeof(double), sizeof(double));
     if (counters == NULL) {
@@ -433,7 +422,7 @@ static double update_centroids(double **centroids, double **datapoints, int k){
                 chosen_m_idx = j;
             }
         }
-        update_cumulative_sums(datapoints[i], cumulative_sums[chosen_m_idx]);
+        update_cumulative_sums(datapoints[i], cumulative_sums[chosen_m_idx], d);
         counters[chosen_m_idx] += 1;
     }
     /* calculate new k centroids 
@@ -458,7 +447,7 @@ static double update_centroids(double **centroids, double **datapoints, int k){
     return max_change;
 }
 
-static void update_cumulative_sums(double *arr, double *cumulative_sum){
+static void update_cumulative_sums(const double *arr, double *cumulative_sum, int d){
     int i;
     for (i=0; i<d; i++){
         cumulative_sum[i] += arr[i];
@@ -468,43 +457,43 @@ static void update_cumulative_sums(double *arr, double *cumulative_sum){
 
 int main(int argc, char *argv[]) {
     char *file_name, *goal;
+    int n, d;
     double **eigen_vectors, **diagonal_degree_matrix_res, **lap_res, *degree,
         **datapoints, **weight_adj_matrix_res, *eigenvalues;
-    int i;
-    if (argc == 3) {
-        goal = argv[1];
-        file_name = argv[2];
-    }
-    else{
+    if (argc != 3) {
         print_invalid_input();
+
     }
-    datapoints = parse_file(file_name);
+    goal = argv[1];
+    file_name = argv[2];
+    datapoints = parse_file(file_name, &n, &d);
     if(strcmp(goal, "wam") == 0) {
-        weight_adj_matrix_res = weight_adj_matrix(datapoints);
+        weight_adj_matrix_res = weight_adj_matrix(datapoints, n, d);
         print_matrix(weight_adj_matrix_res, n, n);
     }
     else if(strcmp(goal, "ddg") == 0) {
 
-        weight_adj_matrix_res = weight_adj_matrix(datapoints);
-        degree = diagonal_degree_matrix(weight_adj_matrix_res, 0);
-        diagonal_degree_matrix_res = degree_to_diagonal_matrix(degree);
+        weight_adj_matrix_res = weight_adj_matrix(datapoints, n, d);
+        degree = diagonal_degree_matrix(weight_adj_matrix_res, 0, n);
+        diagonal_degree_matrix_res = degree_to_diagonal_matrix(degree, n);
         print_matrix(diagonal_degree_matrix_res, n, n);
     }
     else if(strcmp(goal, "lnorm") == 0) {
-        weight_adj_matrix_res = weight_adj_matrix(datapoints);
-        degree = diagonal_degree_matrix(weight_adj_matrix_res, 1);
-        lap_res = normalized_laplacian(weight_adj_matrix_res, degree);
+        weight_adj_matrix_res = weight_adj_matrix(datapoints, n, d);
+        degree = diagonal_degree_matrix(weight_adj_matrix_res, 1, n);
+        lap_res = normalized_laplacian(weight_adj_matrix_res, degree, n);
         print_matrix(lap_res, n, n);
     }
     else if(strcmp(goal, "jacobi") == 0) {
-        eigen_vectors = jacobi_function(datapoints, EPSILON);
-        eigenvalues = get_diagonal(datapoints);
+        eigen_vectors = jacobi_function(datapoints, EPSILON, n);
+        eigenvalues = get_diagonal(datapoints, n);
         print_arr(eigenvalues, n);
         print_matrix(eigen_vectors, n, n);
     }
-    // TODO: FOR tests only - delete before submission
     else if(strcmp(goal, "spk") == 0) {
-        eigen_vectors = spectral_clustrering(datapoints);
+        eigen_vectors = spectral_clustrering(datapoints, n, d);
+        print_matrix(eigen_vectors, n, n);
+        eigen_vectors = kmeans(datapoints, datapoints, 0, 0, 0, n, d);
         print_matrix(eigen_vectors, n, n);
     }
     else{

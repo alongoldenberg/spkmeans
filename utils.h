@@ -1,6 +1,6 @@
-//
-// Created by Alon Goldenberg on 07/03/2022.
-//
+/**
+* Created by Alon Goldenberg & Ofir Nissan.
+*/
 
 #ifndef SPKMEANS_UTILS_H
 #define SPKMEANS_UTILS_H
@@ -13,4 +13,4 @@ int check_is_num(char *str);
 void print_matrix(double **matrix, int n, int d);
 void print_arr(double *arr, int n);
 
-#endif //SPKMEANS_UTILS_H
+#endif
