@@ -421,7 +421,7 @@ double **spectral_clustrering(double **datapoints, int n, int d){
     return T;
 }
 
-static int calcultate_k(double **datapoints, int n, int d){
+static int calculate_k(double **datapoints, int n, int d){
 /**
  * Preform the full spectral k-means algorithm, return k first eigenvectors.
  *
