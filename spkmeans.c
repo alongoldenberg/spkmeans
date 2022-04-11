@@ -1,9 +1,11 @@
-//
-// Created by Alon Goldenberg & Ofir Nissan.
-//
 
 #include "spkmeans.h"
 #include "utils.c"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <math.h>
 
 int n, d;
 
@@ -12,7 +14,7 @@ typedef struct {
     double v;
 } indexed_double;
 
-// TODO: Make sure to free all matrix
+
 
 double **parse_file(char *filename){
     /* Allocate memory and put data from file to a 2d array */
@@ -37,7 +39,7 @@ double **parse_file(char *filename){
 }
 
 
-static double **weight_adj_matrix(double **datapoints){
+double **weight_adj_matrix(double **datapoints){
 /**
  * Calculate Weights Matrix
  *
@@ -62,7 +64,7 @@ static double **weight_adj_matrix(double **datapoints){
 }
 
 
-static double *diagonal_degree_matrix(double **weights, char sq){
+double *diagonal_degree_matrix(double **weights, char sq){
 /**
  * Calculate degree matrix
  *
@@ -70,7 +72,7 @@ static double *diagonal_degree_matrix(double **weights, char sq){
  * @param sq - if !=0, returm D**-0.5
  * @return degree array - n sized array where d[i] = degree of datapoint i
  */
-    // Note: this function returns a 1D array but is considered as 2D with A[i][i] = m[i] with 0 else.
+    /* Note: this function returns a 1D array but is considered as 2D with A[i][i] = m[i] with 0 else.*/
     double sum; double *diagonal; int i,j;
     diagonal = (double*) calloc(n, sizeof(double));
     if (diagonal == NULL) {
@@ -89,7 +91,7 @@ static double *diagonal_degree_matrix(double **weights, char sq){
     return diagonal;
 }
 
-static double **normalized_laplacian(double **weights, const double *degree){
+double **normalized_laplacian(double **weights, const double *degree){
 /**
  * Calculate normalized laplacian matrix
  *
@@ -113,12 +115,12 @@ static double **normalized_laplacian(double **weights, const double *degree){
     return lap;
 }
 
-static double rotate_jacobian(double **a, double **a_tag, double **p) {
+double rotate_jacobian(double **a, double **a_tag, double **p) {
     int i, j; double s, c, t; int *max; double max_value;
     max = max_off_diagonal(a);
     i = max[0], j=max[1];
     if (a[i][j]==0){
-        // A is already diagonal
+        /* A is already diagonal*/
         return 0;
     }
     max_value = a[i][j];
@@ -132,7 +134,7 @@ static double rotate_jacobian(double **a, double **a_tag, double **p) {
 }
 
 
-static double **jacobi_function(double **a, double eps){
+double **jacobi_function(double **a, double eps){
 /**
  * Preform the Jacobian algorithm.
  *
@@ -155,23 +157,23 @@ static double **jacobi_function(double **a, double eps){
     return p;
 }
 
-static double calc_c(double t){
-// calculates value of c
+double calc_c(double t){
+/* calculates value of c*/
     double c;
     c =  1 / sqrt((pow(t, 2) + 1));
     return c;
 }
 
-static double calc_t(double **m, int i, int j){
-    // calculates value of t
+double calc_t(double **m, int i, int j){
+    /* calculates value of t*/
     double theta, t;
     theta = (m[j][j] - m[i][i]) / (2*m[i][j]);
     t = sign(theta) / (fabs(theta) + sqrt(pow(theta, 2) + 1));
     return t;
 }
 
-static double sign(double x) {
-    // given double returns it's sign. Note: sign(0) = 1.
+double sign(double x) {
+    /* given double returns it's sign. Note: sign(0) = 1.*/
     double s;
     if(x == 0){
         return 1;
@@ -180,7 +182,7 @@ static double sign(double x) {
     return s;
 }
 
-static int *max_off_diagonal(double **m){
+int *max_off_diagonal(double **m){
 /**
  * Finds the indices of the maximum double in a matrix
  *
@@ -189,7 +191,7 @@ static int *max_off_diagonal(double **m){
  */
     int *res; double max = 0; int i,j;
     res =  (int*) calloc(2, sizeof(int));
-    // Just sanity check if the matrix is already all zeroes:
+    /* Just sanity check if the matrix is already all zeroes:*/
     res[0] = 0;
     res[1] = 1;
     if (res == NULL) {
@@ -207,7 +209,7 @@ static int *max_off_diagonal(double **m){
     return res;
 }
 
-static void calc_a_tag(double **a, double **a_tag, double s, double c, int i, int j){
+void calc_a_tag(double **a, double **a_tag, double s, double c, int i, int j){
 /**
  * Calculates A' and returns the off-diagonal difference between A and A'
  *
@@ -233,7 +235,7 @@ static void calc_a_tag(double **a, double **a_tag, double s, double c, int i, in
     a_tag[j][i] = 0;
 }
 
-static void calc_p(double **p, int i, int j, double s, double c){
+void calc_p(double **p, int i, int j, double s, double c){
 /**
  * Calculates Rotation Matrices in place using heuristics
  *
@@ -250,8 +252,8 @@ static void calc_p(double **p, int i, int j, double s, double c){
     }
 }
 
-static void copy_matrix(double **m, double **c) {
-    // Deep copy a n*n matrix
+void copy_matrix(double **m, double **c) {
+    /* Deep copy a n*n matrix*/
     int i, j;
     for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
@@ -260,8 +262,8 @@ static void copy_matrix(double **m, double **c) {
     }
 }
 
-static double **identity_matrix(int k) {
-    // return an N*N identity matrix
+double **identity_matrix(int k) {
+    /* return an N*N identity matrix*/
     double **identity; int i;
     identity = allocate_data(n, n);
     for (i = 0; i < k; i++) {
@@ -270,8 +272,8 @@ static double **identity_matrix(int k) {
     return identity;
 }
 
-static double *get_diagonal(double **m) {
-    // return an N*N identity matrix
+double *get_diagonal(double **m) {
+    /* return an N*N identity matrix*/
     double *diagonal; int i;
     diagonal = (double *)calloc(n, sizeof(double ));
     if (diagonal == NULL) {
@@ -283,11 +285,10 @@ static double *get_diagonal(double **m) {
     return diagonal;
 }
 
-static double **degree_to_diagonal_matrix(double *degree){
-    // Use to convert the 1D array to 2D array
-    double **diagonal_degree_matrix_res;
+double **degree_to_diagonal_matrix(double *degree){
+    /* Use to convert the 1D array to 2D array*/
+    double **diagonal_degree_matrix_res; int i;
     diagonal_degree_matrix_res = allocate_data(n, n);
-    int i;
     for (i=0 ; i<n; i++){
             diagonal_degree_matrix_res[i][i] = degree[i];
     }
@@ -297,7 +298,7 @@ static double **degree_to_diagonal_matrix(double *degree){
 
 int idx_cmp( const void* a, const void* b)
 {
-    // Sort indexed double array
+    /* Sort indexed double array*/
     indexed_double *x = (indexed_double *) a;
     indexed_double *y = (indexed_double *) b;
 
@@ -310,7 +311,7 @@ int idx_cmp( const void* a, const void* b)
 }
 
 
-static int eigengap_hueuristic(const double *eigenvaleus){
+int eigengap_hueuristic(const double *eigenvaleus){
 /**
  * Preform the eigengap heuristic: given a set of eigenvalues return max idx difference of sorted eigenvalues
  *
@@ -328,7 +329,7 @@ static int eigengap_hueuristic(const double *eigenvaleus){
     }
     return max_diff_idx + 1;
 }
-static void sort_eigenvalues_and_vectors(const double *eigenvalues, double **eigenvectors,
+void sort_eigenvalues_and_vectors(const double *eigenvalues, double **eigenvectors,
                                          double * s_eigenvalues, double ** s_eigenvectors){
     indexed_double *eigenvalues_idx;
     int i;
@@ -348,7 +349,7 @@ static void sort_eigenvalues_and_vectors(const double *eigenvalues, double **eig
     free(eigenvalues_idx);
 }
 
-static double **calculate_T(double **eigenvectors, int k){
+double **calculate_T(double **eigenvectors, int k){
     double **T, *norms, sum;
     int i,j;
     T = allocate_data(n, k);
@@ -356,7 +357,7 @@ static double **calculate_T(double **eigenvectors, int k){
     if (norms == NULL) {
         print_error();
     }
-    // Calculate norms:
+    /* Calculate norms:*/
     for (j=0;j<k;j++){
         sum = 0;
         for(i=0;i<n;i++){
@@ -374,7 +375,7 @@ static double **calculate_T(double **eigenvectors, int k){
 }
 
 
-static double **spectral_clustrering(double **datapoints){
+double **spectral_clustrering(double **datapoints){
 /**
  * Preform the full spectral k-means algorithm, return optimal k.
  *
@@ -410,7 +411,7 @@ static double **spectral_clustrering(double **datapoints){
 
 
 /*kmeans from first and second exc:*/
-static double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon) {
+double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon) {
     double max_change; int iterations=0;
     do{
         max_change = update_centroids(centroids, datapoints, k);
@@ -419,7 +420,7 @@ static double **kmeans(double **datapoints, double **centroids, int k, int max_i
     return centroids;
 }
 
-static double update_centroids(double **centroids, double **datapoints, int k){
+double update_centroids(double **centroids, double **datapoints, int k){
     double **cumulative_sums; double *counters; int chosen_m_idx; double max_change=0; double *old_centroid; int i,j;
     counters = (double*) calloc(k*sizeof(double), sizeof(double));
     if (counters == NULL) {
@@ -458,7 +459,7 @@ static double update_centroids(double **centroids, double **datapoints, int k){
     return max_change;
 }
 
-static void update_cumulative_sums(double *arr, double *cumulative_sum){
+void update_cumulative_sums(double *arr, double *cumulative_sum){
     int i;
     for (i=0; i<d; i++){
         cumulative_sum[i] += arr[i];
@@ -470,7 +471,7 @@ int main(int argc, char *argv[]) {
     char *file_name, *goal;
     double **eigen_vectors, **diagonal_degree_matrix_res, **lap_res, *degree,
         **datapoints, **weight_adj_matrix_res, *eigenvalues;
-    int i;
+    
     if (argc == 3) {
         goal = argv[1];
         file_name = argv[2];
@@ -502,7 +503,7 @@ int main(int argc, char *argv[]) {
         print_arr(eigenvalues, n);
         print_matrix(eigen_vectors, n, n);
     }
-    // TODO: FOR tests only - delete before submission
+   /* TODO: FOR tests only - delete before submission*/
     else if(strcmp(goal, "spk") == 0) {
         eigen_vectors = spectral_clustrering(datapoints);
         print_matrix(eigen_vectors, n, n);
