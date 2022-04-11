@@ -11,17 +11,17 @@
 
 int d; int n;
 
-static void print_error();
-static double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon);
-static double update_centroids(double **centroids, double **datapoints, int k, int n, int d);
-static void update_cumulative_sums(double *arr, double *cumulative_sum);
+void print_error();
+double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon);
+double update_centroids(double **centroids, double **datapoints, int k, int n, int d);
+void update_cumulative_sums(double *arr, double *cumulative_sum);
 
-static void print_error(){
+void print_error(){
     printf("An Error Has Occurred!\n");
     exit(1);
 }
 
-static double **allocate_data(int n, int d) {
+double **allocate_data(int n, int d) {
     double *p; double **a; int i;
     p = (double*)calloc(n*d, sizeof(double));
     a = (double**) calloc(n,sizeof(double *));
@@ -35,7 +35,7 @@ static double **allocate_data(int n, int d) {
 }
 
 
-static double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon) {
+double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon) {
     double max_change; int iterations=0;
     do{
         max_change = update_centroids(centroids, datapoints, k, n , d);
@@ -44,7 +44,7 @@ static double **kmeans(double **datapoints, double **centroids, int k, int max_i
     return centroids;
 }
 
-static double update_centroids(double **centroids, double **datapoints, int k, int n, int d){
+double update_centroids(double **centroids, double **datapoints, int k, int n, int d){
     double **cumulative_sums; double *counters; int chosen_m_idx; double max_change=0; double *old_centroid; int i,j;
     counters = (double*) calloc(k*sizeof(double), sizeof(double));
     if (counters == NULL) {
@@ -85,7 +85,7 @@ static double update_centroids(double **centroids, double **datapoints, int k, i
 }
 
 
-static void update_cumulative_sums(double *arr, double *cumulative_sum){
+void update_cumulative_sums(double *arr, double *cumulative_sum){
     int i;
     for (i=0; i<d; i++){
         cumulative_sum[i] += arr[i];
@@ -96,7 +96,7 @@ static void update_cumulative_sums(double *arr, double *cumulative_sum){
  * Below - Python C-API implementation:
  */
 
-static void initalize_datapoints(PyObject *dp_pointer, double **datapoints){
+void initalize_datapoints(PyObject *dp_pointer, double **datapoints){
     PyObject *t;
     int i, j;
     for(i=0; i<n;i++){
@@ -108,7 +108,7 @@ static void initalize_datapoints(PyObject *dp_pointer, double **datapoints){
     }
 }
 
-static void initalize_centroids(PyObject *centroids_pointer, double **centroids, int k){
+void initalize_centroids(PyObject *centroids_pointer, double **centroids, int k){
     PyObject *t; int i, j;
     for(i=0; i<k;i++){
         t = PyList_GetItem(centroids_pointer, i);
@@ -117,7 +117,7 @@ static void initalize_centroids(PyObject *centroids_pointer, double **centroids,
     }
 }
 
-static void put_centroids(PyObject *py_centroids, double **centroids, int k){
+void put_centroids(PyObject *py_centroids, double **centroids, int k){
     PyObject *t; int i, j;
     for(i=0; i<k;i++){
         t = PyList_New(d);
@@ -129,7 +129,7 @@ static void put_centroids(PyObject *py_centroids, double **centroids, int k){
     }
 }
 
-static PyObject* mykmeanssp(PyObject *self, PyObject *args){
+PyObject* mykmeanssp(PyObject *self, PyObject *args){
     PyObject *dp_pointer, *centroids_pointer, *py_centroids;
     double **datapoints, **centroids, epsilon;
     int k, max_iter;
@@ -158,7 +158,7 @@ static PyObject* mykmeanssp(PyObject *self, PyObject *args){
     return py_centroids;
 }
 
-static PyMethodDef kmeans_methods[] = {
+PyMethodDef kmeans_methods[] = {
         {"fit",
                 (PyCFunction) mykmeanssp,
                      METH_VARARGS,
@@ -166,7 +166,7 @@ static PyMethodDef kmeans_methods[] = {
         {NULL, NULL, 0, NULL}
 };
 
-static struct PyModuleDef _moduledef = {
+struct PyModuleDef _moduledef = {
         PyModuleDef_HEAD_INIT,
         "mykmeanssp",
         NULL,

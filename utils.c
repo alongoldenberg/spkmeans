@@ -1,8 +1,9 @@
-//
-// Created by Alon Goldenberg on 07/03/2022.
-//
-
 #include "utils.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <math.h>
 
 int n ,d;
 double distance(double *arr1, double *arr2, int d){
@@ -29,7 +30,7 @@ double **allocate_data(int n, int d) {
     return a;
 }
 
-static void print_error(){
+void print_error(){
     printf("An Error Has Occurred!\n");
     exit(1);
 }
