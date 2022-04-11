@@ -36,7 +36,10 @@ double update_centroids(double **centroids, double **datapoints, int , int n, in
 void update_cumulative_sums(const double *arr, double *cumulative_sum, int d);
 void sort_eigenvalues_and_vectors(const double *eigenvalues, double **eigenvectors,
                                          double * s_eigenvalues, double ** s_eigenvectors, int n);
-double **calculate_T(double **eigenvectors, int k, int n);
+static double **calculate_T(double **eigenvectors, int k, int n);
+static double **calculate_k(double **datapoints, int n, int d);
+static double **spectral_clustrering(double **datapoints, int n, int d);
+
 
 
 #endif
