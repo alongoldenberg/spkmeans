@@ -1,8 +1,7 @@
 from setuptools import setup, Extension, find_packages
 
-setup(name='spkmeans',
+setup(name='myspkmeans',
       version='1.0',
-      author="Alon Goldenberg & Ofir Nissan",
       install_requires=["pandas",
                         "numpy"],
       packages=find_packages(),
