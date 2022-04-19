@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import pandas as pd
 import myspkmeans
-
+import traceback
 
 
 def initial_centroids(datapoints, k):
@@ -84,8 +84,21 @@ def sqr_distance(m, x):
 
 
 def print_results(centroids):
+    centroids = centroids.round(4)
     for centroid in centroids:
-        print(','.join(map(str, centroid)))
+        for i in range(len(centroid)):
+            if centroid[i] == -0.0000:
+                centroid[i] = 0.0000
+    for centroid in centroids:
+        print(",".join('%.4f' % x for x in centroid))
+
+
+def print_eigenvalues(eigenvalues):
+    diagonal = np.diag(np.array(eigenvalues))
+    for i in range(len(diagonal)):
+        if diagonal[i] == -0.0000:
+            diagonal[i] = 0.0000
+    print(",".join('%.4f' % x for x in diagonal))
 
 
 def main():
@@ -93,14 +106,20 @@ def main():
     try:
         input_args = sys.argv
         if len(input_args) != 4:
+            # print("first condition")
             raise Exception
         k = int(input_args[1])
-        goal = int(input_args[2])
+        # print("k", k)
+        goal = input_args[2]
+        # print("goal", goal)
         file = input_args[3]
-        datapoints = pd.read_csv(file, index_col=0, header=None).round(4)
+        datapoints = pd.read_csv(file, header=None)
+        # print("data_pandas", datapoints)
         datapoints = datapoints.to_numpy().tolist()
+        # print("data_numpy", datapoints)
         n = len(datapoints)
         d = len(datapoints[0])
+        # print("n , k , d", n, k , d)
         if k >= len(datapoints) or k < 0:
             raise Exception
     except:
@@ -112,15 +131,21 @@ def main():
             if k == 0:
                 k = heuristic_k
             centroids, centroids_index = initial_centroids(np.array(T), k)
-            kmeans_new_centroids = myspkmeans.calc_kmeans_capi(n, d, k, datapoints, centroids)
-            print_results(kmeans_new_centroids)
+            # print("centroids \n")
+            # print(centroids)
+            kmeans_new_centroids = myspkmeans.kmeans(n, d, k, datapoints, centroids.tolist())
+            print("res")
+            print_results(np.array(kmeans_new_centroids))
         elif goal == "jacobi":
-            values_and_vectors = myspkmeans.get_goal(n, n, goal, datapoints)
-            # parse and print values and vectors
-            print_results(np.diag(np.array(values_and_vectors[0]).round(4)))
-            print_results(np.array(values_and_vectors[1]).round(4))
+            values_and_vectors = myspkmeans.get_goal(n, d, goal, datapoints)
+            # print("values_and_vectors\n")
+            values = values_and_vectors[0]  # diagonal matrix form
+            vectors = values_and_vectors[1]
+            print_eigenvalues(values)
+            print_results(np.array(vectors))
         else:
-            print_results(np.array(myspkmeans.get_goal(n, d, goal, datapoints)).round(4))
+            # print("here is " + str(goal)+":\n")
+            print_results(np.array(myspkmeans.get_goal(n, d, goal, datapoints)))
     except:
         print(traceback.format_exc())
         print("An Error Has Occurred!")

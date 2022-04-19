@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <math.h>
 
+
 double distance(double *arr1, double *arr2, int d){
     double res = 0; int i; double delta; double sqr_delta;
     for (i=0; i<d; i++){
@@ -32,13 +33,13 @@ double **allocate_data(int n, int d) {
     return a;
 }
 
-void print_error(){
+void print_error(void){
     printf("An Error Has Occurred!\n");
     exit(1);
 }
 
 
-void print_invalid_input(){
+void print_invalid_input(void){
     printf("Invalid Input!\n");
     exit(1);
 }

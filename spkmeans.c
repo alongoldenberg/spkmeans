@@ -50,7 +50,7 @@ double **weight_adj_matrix(double **datapoints, int n, int d){
     int i, j; double dist, w; double ** weights;
     weights = allocate_data(n, n);
     for (i=0;i<n;i++){
-        for(j=0;j<=i;j++){
+        for(j=0;j<i;j++){
             if(i==j){
                 weights[i][i] = 0;
                 continue;
@@ -327,7 +327,7 @@ int eigengap_hueuristic(const double *eigenvaleus, int n){
  * @param eigenvalues - sorted eigenvalues array
   *@result max_diff  - the maximal difference idx in 1-(n/2) smallest eigenvalues
  */
-    int max_diff_idx, i;
+    int max_diff_idx = 0, i;
     double max_diff = 0, diff;
     for (i = 0; i < n / 2; i++) {
         diff = eigenvaleus[i + 1] - eigenvaleus[i];
@@ -420,33 +420,6 @@ double **spectral_clustrering(double **datapoints, int n, int d){
     free(eigenvalues);
     return T;
 }
-
-static int calculate_k(double **datapoints, int n, int d){
-/**
- * Preform the full spectral k-means algorithm, return k first eigenvectors.
- *
- * @param datapoints - 2D array of datapoints size n*d.
- * @invariant - n and d are initialized.
-  *@result T - requested matrix 
- */    
-    double **weights, *degree, **laplacian, *eigenvalues, **eigenvectors,
-            *s_eigenvalues, **s_eigenvectors;
-    int k;
-    s_eigenvalues = (double *) calloc(n, sizeof (double));
-    if (s_eigenvalues == NULL) {
-        print_error();
-    }
-    s_eigenvectors = allocate_data(n, n);
-    weights = weight_adj_matrix(datapoints, n, d);
-    degree = diagonal_degree_matrix(weights, 1, n);
-    laplacian = normalized_laplacian(weights, degree, n);
-    eigenvectors = jacobi_function(laplacian, EPSILON, n);
-    eigenvalues = get_diagonal(laplacian, n);
-    sort_eigenvalues_and_vectors(eigenvalues, eigenvectors, s_eigenvalues, s_eigenvectors, n);
-    k = eigengap_hueuristic(s_eigenvalues, n);
-    return k;
-}
-
 
 
 /*kmeans from first and second exc:*/
