@@ -162,7 +162,6 @@ static PyObject* calc_kmeans_capi(PyObject *self, PyObject *args){
         puts("problem 3");
         return NULL;
     }
-        
     datapoints = data_py_to_c_type(datapoints_py_type, n, d);
     centroids = data_py_to_c_type(centroids_py_type, k, d);
     centroids = kmeans(datapoints, centroids, k, MAX_ITER, EPSILON, n, d);

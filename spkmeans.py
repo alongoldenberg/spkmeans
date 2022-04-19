@@ -84,11 +84,6 @@ def sqr_distance(m, x):
 
 
 def print_results(centroids):
-    centroids = centroids.round(4)
-    for centroid in centroids:
-        for i in range(len(centroid)):
-            if centroid[i] == -0.0000:
-                centroid[i] = 0.0000
     for centroid in centroids:
         print(",".join('%.4f' % x for x in centroid))
 
@@ -109,6 +104,9 @@ def main():
             # print("first condition")
             raise Exception
         k = int(input_args[1])
+        if(k == 1):
+            print("Invalid Input!")
+            return
         # print("k", k)
         goal = input_args[2]
         # print("goal", goal)
@@ -133,8 +131,6 @@ def main():
                 k = heuristic_k
             centroids, centroids_index = initial_centroids(T.to_numpy(), k)
             real_index = [int(T.iloc[i].name) for i in centroids_index]
-        # print("centroids \n")
-            # print(centroids)
             kmeans_new_centroids = myspkmeans.kmeans(n, heuristic_k, k, T.values.tolist(), centroids.tolist())
             print(','.join(map(str, real_index)))
             print_results(np.array(kmeans_new_centroids))

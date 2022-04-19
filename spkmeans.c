@@ -16,7 +16,7 @@ typedef struct {
 } indexed_double;
 
 
-double **parse_file(char *filename, int *n, int *d){
+double **parse_file(char *filename, int* n, int* d){
     /* Allocate memory and put data from file to a 2d array */
     FILE *data = NULL; double **arr; double num; int i,j;
 
@@ -485,7 +485,7 @@ int main(int argc, char *argv[]) {
     char *file_name, *goal;
     int n, d;
     double **eigen_vectors, **diagonal_degree_matrix_res, **lap_res, *degree,
-        **datapoints, **weight_adj_matrix_res, *eigenvalues;
+        **datapoints, **weight_adj_matrix_res, *eigenvalues, **centroids;
     if (argc != 3) {
         print_invalid_input();
 
@@ -518,10 +518,7 @@ int main(int argc, char *argv[]) {
     }
     /* For testing: - delete after*/
     else if(strcmp(goal, "spk") == 0) {
-        eigen_vectors = spectral_clustrering(datapoints, n, d);
-        print_matrix(eigen_vectors, n, d);
-        eigen_vectors = kmeans(datapoints, datapoints, 14, 100, EPSILON, n, d);
-        print_matrix(eigen_vectors, n, n);
+
     }
     else{
             printf("Invalid Input!");
