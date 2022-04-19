@@ -98,12 +98,12 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
     datapoints = data_py_to_c_type(datapoints_py_type, n, d);   
     
     if  (strcmp("spk_T_and_k", my_goal_c_type)==0){
-        double **eigen_vectors;
+        double **T;
         int k;
-        eigen_vectors = spectral_clustrering(datapoints, n, d);
+        T = spectral_clustrering(datapoints, n, d);
         k = calculate_k(datapoints,  n, d);
         // print_matrix(eigen_vectors, n, d);
-        result = data_c_to_py_type(eigen_vectors, n, d);
+        result = data_c_to_py_type(T, n, k);
         return Py_BuildValue("Oi", result, k);
     }
     else if(strcmp(my_goal_c_type, "wam") == 0) {
@@ -150,7 +150,7 @@ static PyObject* calc_kmeans_capi(PyObject *self, PyObject *args){
     double** datapoints;
     double** centroids;
     int n, d, k;
-    if(!PyArg_ParseTuple(args, "iiiOO:get_goal", &n, &d, &k, &datapoints_py_type, &centroids_py_type)) {
+    if(!PyArg_ParseTuple(args, "iiiOO:calc_kmeans", &n, &d, &k, &datapoints_py_type, &centroids_py_type)) {
         puts("problem 1");
         return NULL; 
     }
@@ -162,13 +162,9 @@ static PyObject* calc_kmeans_capi(PyObject *self, PyObject *args){
         puts("problem 3");
         return NULL;
     }
-        
     datapoints = data_py_to_c_type(datapoints_py_type, n, d);
     centroids = data_py_to_c_type(centroids_py_type, k, d);
-    print_matrix(centroids, k, d);
-    centroids = kmeans(datapoints, centroids, k, MAX_ITTER, EPSILON, n, d);
-    puts("after");
-    print_matrix(centroids, k, d);
+    centroids = kmeans(datapoints, centroids, k, MAX_ITER, EPSILON, n, d);
     centroids_py_type = data_c_to_py_type(centroids, k, d);
     return Py_BuildValue("O", centroids_py_type);
 }
