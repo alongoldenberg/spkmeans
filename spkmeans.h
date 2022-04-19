@@ -9,7 +9,7 @@
 
 #define LEN(arr) ((int) (sizeof (arr) / sizeof (arr)[0]))
 #define MAX_ROTATIONS 100
-#define MAX_ITTER 300
+#define MAX_ITER 300
 #define EPSILON exp(-15)
 
 

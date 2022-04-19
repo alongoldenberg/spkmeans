@@ -329,7 +329,7 @@ int eigengap_hueuristic(const double *eigenvaleus, int n){
  */
     int max_diff_idx = 0, i;
     double max_diff = 0, diff;
-    for (i = 0; i < n / 2; i++) {
+    for (i = 0; i <= n / 2; i++) {
         diff = eigenvaleus[i + 1] - eigenvaleus[i];
         if (diff > max_diff) {
             max_diff = diff;
@@ -423,7 +423,6 @@ double **spectral_clustrering(double **datapoints, int n, int d){
 
 
 /*kmeans from first and second exc:*/
-
 double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon, int n, int d) {
     double max_change; int iterations=0;
     do{
@@ -451,7 +450,7 @@ double update_centroids(double **centroids, double **datapoints, int k, int n, i
         update_cumulative_sums(datapoints[i], cumulative_sums[chosen_m_idx], d);
         counters[chosen_m_idx] += 1;
     }
-    /* calculate new k centroids 
+    /* calculate new k centroids
      and calculate the maximum euclidean norm ||delta_mu||:*/
     old_centroid = (double*)calloc(n*d, sizeof(double));
     if (old_centroid == NULL){
@@ -517,11 +516,11 @@ int main(int argc, char *argv[]) {
         print_arr(eigenvalues, n);
         print_matrix(eigen_vectors, n, n);
     }
-
+    /* For testing: - delete after*/
     else if(strcmp(goal, "spk") == 0) {
         eigen_vectors = spectral_clustrering(datapoints, n, d);
-        print_matrix(eigen_vectors, n, n);
-        eigen_vectors = kmeans(datapoints, datapoints, 0, 0, 0, n, d);
+        print_matrix(eigen_vectors, n, d);
+        eigen_vectors = kmeans(datapoints, datapoints, 14, 100, EPSILON, n, d);
         print_matrix(eigen_vectors, n, n);
     }
     else{
