@@ -387,7 +387,7 @@ double **calculate_T(double **eigenvectors, int k, int n){
 
 
 
-double **spectral_clustrering(double **datapoints, int n, int d){
+double **spectral_clustrering(double **datapoints, int n, int d, int k){
 /**
  * Preform the full spectral k-means algorithm, return k first eigenvectors.
  *
@@ -397,7 +397,6 @@ double **spectral_clustrering(double **datapoints, int n, int d){
  */    
     double **weights, *degree, **laplacian, *eigenvalues, **eigenvectors,
             *s_eigenvalues, **s_eigenvectors, **T;
-    int k;
     s_eigenvalues = (double *) calloc(n, sizeof (double));
     if (s_eigenvalues == NULL) {
         print_error();
@@ -420,7 +419,9 @@ double **spectral_clustrering(double **datapoints, int n, int d){
     puts("sorted e_values");
     print_arr(s_eigenvalues, n);
 
-    k = eigengap_hueuristic(s_eigenvalues, n);
+    if(k==0) {
+        k = eigengap_hueuristic(s_eigenvalues, n);
+    }
     T = calculate_T(s_eigenvectors, k, n);
     free(s_eigenvalues);
     free(s_eigenvectors);
@@ -530,6 +531,7 @@ int main(int argc, char *argv[]) {
     /* For testing: - delete after*/
     else if(strcmp(goal, "spk") == 0) {
 
+
     }
     else{
             printf("Invalid Input!");
@@ -537,3 +539,4 @@ int main(int argc, char *argv[]) {
     }
     return 0;
 }
+

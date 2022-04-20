@@ -99,18 +99,16 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
     
     if  (strcmp("spk_T_and_k", my_goal_c_type)==0){
         double **T;
-        T = spectral_clustrering(datapoints, n, d);
-        if (k==0){
-            k = calculate_k(datapoints,  n, d);
+        T = spectral_clustrering(datapoints, n, d, k);
+        if(k==0) {
+            k = calculate_k(datapoints, n, d);
         }
-        // print_matrix(eigen_vectors, n, d);
         result = data_c_to_py_type(T, n, k);
         return Py_BuildValue("Oi", result, k);
     }
     else if(strcmp(my_goal_c_type, "wam") == 0) {
         double **weight_adj_matrix_res;
         weight_adj_matrix_res = weight_adj_matrix(datapoints, n, d);
-        //print_matrix(weight_adj_matrix_res, n, n);
         result = data_c_to_py_type(weight_adj_matrix_res, n, n);
     }
     else if(strcmp(my_goal_c_type, "ddg") == 0) {
@@ -118,7 +116,6 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
         weight_adj_matrix_res = weight_adj_matrix(datapoints, n, d);
         degree = diagonal_degree_matrix(weight_adj_matrix_res, 0, n);
         diagonal_degree_matrix_res = degree_to_diagonal_matrix(degree, n);
-        //print_matrix(diagonal_degree_matrix_res, n, n);
         result = data_c_to_py_type(diagonal_degree_matrix_res, n, n);
     }
     else if(strcmp(my_goal_c_type, "lnorm") == 0) {
@@ -126,14 +123,12 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
         weight_adj_matrix_res = weight_adj_matrix(datapoints, n, d);
         degree = diagonal_degree_matrix(weight_adj_matrix_res, 1, n);
         lap_res = normalized_laplacian(weight_adj_matrix_res, degree, n);
-        //print_matrix(lap_res, n, n);
         result = data_c_to_py_type(lap_res, n, n);
     }
     else if(strcmp(my_goal_c_type, "jacobi") == 0) {
         double **eigen_vectors;
         PyObject *eigen_vectors_py;
         eigen_vectors = jacobi_function(datapoints, EPSILON, n);  /*here datapoints is symitric matrix with eignvalues over the diagonal*/
-        // print_matrix(datapoints, n, n);
         eigen_vectors_py = data_c_to_py_type(eigen_vectors, n, n);
         return Py_BuildValue("OO", data_c_to_py_type(datapoints, n, n), eigen_vectors_py);
     }
@@ -150,7 +145,8 @@ static PyObject* calc_kmeans_capi(PyObject *self, PyObject *args){
     PyObject* centroids_py_type;
     double** datapoints;
     double** centroids;
-    int n, d, k;
+    int n, d, k, eps;
+    eps = 0; // Default Value
     if(!PyArg_ParseTuple(args, "iiiOO:calc_kmeans", &n, &d, &k, &datapoints_py_type, &centroids_py_type)) {
         puts("problem 1");
         return NULL; 
@@ -165,7 +161,7 @@ static PyObject* calc_kmeans_capi(PyObject *self, PyObject *args){
     }
     datapoints = data_py_to_c_type(datapoints_py_type, n, d);
     centroids = data_py_to_c_type(centroids_py_type, k, d);
-    centroids = kmeans(datapoints, centroids, k, MAX_ITER, EPSILON, n, d);
+    centroids = kmeans(datapoints, centroids, k, MAX_ITER, eps, n, d);
     centroids_py_type = data_c_to_py_type(centroids, k, d);
     return Py_BuildValue("O", centroids_py_type);
 }

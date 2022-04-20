@@ -101,24 +101,18 @@ def main():
     try:
         input_args = sys.argv
         if len(input_args) != 4:
-            # print("first condition")
             raise Exception
         k = int(input_args[1])
 
         if(k == 1):
             print("Invalid Input!")
             return
-        # print("k", k)
         goal = input_args[2]
-        # print("goal", goal)
         file = input_args[3]
         datapoints = pd.read_csv(file, header=None)
-        # print("data_pandas", datapoints)
         datapoints = datapoints.to_numpy().tolist()
-        # print("data_numpy", datapoints)
         n = len(datapoints)
         d = len(datapoints[0])
-        # print("n , k , d", n, k , d)
         if k >= len(datapoints) or k < 0:
             raise Exception
     except:
@@ -136,13 +130,11 @@ def main():
             print_results(np.array(kmeans_new_centroids))
         elif goal == "jacobi":
             values_and_vectors = myspkmeans.get_goal(n, d, k, goal, datapoints)
-            # print("values_and_vectors\n")
             values = values_and_vectors[0]  # diagonal matrix form
             vectors = values_and_vectors[1]
             print_eigenvalues(values)
             print_results(np.array(vectors))
         else:
-            # print("here is " + str(goal)+":\n")
             print_results(np.array(myspkmeans.get_goal(n, d, k, goal, datapoints)))
     except:
         print(traceback.format_exc())
