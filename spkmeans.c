@@ -405,9 +405,20 @@ double **spectral_clustrering(double **datapoints, int n, int d, int k){
     weights = weight_adj_matrix(datapoints, n, d);
     degree = diagonal_degree_matrix(weights, 1, n);
     laplacian = normalized_laplacian(weights, degree, n);
+    
     eigenvectors = jacobi_function(laplacian, EPSILON, n);
+    puts("eigenvectors");
+    print_matrix(eigenvectors, n, n);
+    
     eigenvalues = get_diagonal(laplacian, n);
     sort_eigenvalues_and_vectors(eigenvalues, eigenvectors, s_eigenvalues, s_eigenvectors, n);
+
+    puts("sorted eigenvectors");
+    print_matrix(s_eigenvectors, n, n);
+
+    puts("sorted e_values");
+    print_arr(s_eigenvalues, n);
+
     if(k==0) {
         k = eigengap_hueuristic(s_eigenvalues, n);
     }
