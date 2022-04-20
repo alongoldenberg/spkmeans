@@ -75,7 +75,7 @@ static PyObject* data_c_to_py_type(double** data_c_type, int data_size_n, int da
     for (i = 0; i < data_size_n; i++) {
         py_point_vector = PyList_New(0);
         for (j=0; j< data_dimension; j++){
-            PyList_Append(py_point_vector, PyFloat_FromDouble(data_c_type[j][i]));
+            PyList_Append(py_point_vector, PyFloat_FromDouble(data_c_type[i][j]));
         }
         PyList_Append(py_data_pointer, py_point_vector);
     }
