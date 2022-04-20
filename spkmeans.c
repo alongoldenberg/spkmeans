@@ -152,6 +152,7 @@ double **jacobi_function(double **a, double eps, int n){
     p = identity_matrix(n);
     for(k=0;k<MAX_ROTATIONS;k++){
         off_diagonal = rotate_jacobian(a, a_tag, p, n);
+        printf("Rotation: %d", k);
         if(off_diagonal <= eps) {
             break;
         }
@@ -405,7 +406,9 @@ double **spectral_clustrering(double **datapoints, int n, int d, int k){
     weights = weight_adj_matrix(datapoints, n, d);
     degree = diagonal_degree_matrix(weights, 1, n);
     laplacian = normalized_laplacian(weights, degree, n);
-    
+    puts("laplacian");
+    print_matrix(laplacian, n, n);
+
     eigenvectors = jacobi_function(laplacian, EPSILON, n);
     puts("eigenvectors");
     print_matrix(eigenvectors, n, n);
