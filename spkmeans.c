@@ -329,7 +329,7 @@ int eigengap_hueuristic(const double *eigenvaleus, int n){
  */
     int max_diff_idx = 0, i;
     double max_diff = 0, diff;
-    for (i = 0; i < n / 2; i++) {
+    for (i = 0; i <= n / 2; i++) {
         diff = eigenvaleus[i + 1] - eigenvaleus[i];
         if (diff > max_diff) {
             max_diff = diff;
@@ -405,7 +405,7 @@ double **spectral_clustrering(double **datapoints, int n, int d){
     s_eigenvectors = allocate_data(n, n);
     weights = weight_adj_matrix(datapoints, n, d);
     degree = diagonal_degree_matrix(weights, 1, n);
-    laplacian = normalized_laplacian(datapoints, degree, n);
+    laplacian = normalized_laplacian(weights, degree, n);
     
     eigenvectors = jacobi_function(laplacian, EPSILON, n);
     puts("eigenvectors");
@@ -421,8 +421,6 @@ double **spectral_clustrering(double **datapoints, int n, int d){
     print_arr(s_eigenvalues, n);
 
     k = eigengap_hueuristic(s_eigenvalues, n);
-    printf("k is %i \n", k);
-
     T = calculate_T(s_eigenvectors, k, n);
     free(s_eigenvalues);
     free(s_eigenvectors);
