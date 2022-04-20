@@ -86,9 +86,9 @@ static PyObject* data_c_to_py_type(double** data_c_type, int data_size_n, int da
 static PyObject* get_goal_capi(PyObject *self, PyObject *args){
     PyObject *datapoints_py_type, *result;
     char* my_goal_c_type;
-    int n, d;
+    int n, d, k;
     double **datapoints; 
-    if(!PyArg_ParseTuple(args, "iisO:get_goal", &n, &d, &my_goal_c_type, &datapoints_py_type)) {
+    if(!PyArg_ParseTuple(args, "iiisO:get_goal", &n, &d, &k, &my_goal_c_type, &datapoints_py_type)) {
         return NULL; 
     }
     if (!PyList_Check(datapoints_py_type)){
@@ -99,9 +99,10 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
     
     if  (strcmp("spk_T_and_k", my_goal_c_type)==0){
         double **T;
-        int k;
         T = spectral_clustrering(datapoints, n, d);
-        k = calculate_k(datapoints,  n, d);
+        if (k==0){
+            k = calculate_k(datapoints,  n, d);
+        }
         // print_matrix(eigen_vectors, n, d);
         result = data_c_to_py_type(T, n, k);
         return Py_BuildValue("Oi", result, k);
