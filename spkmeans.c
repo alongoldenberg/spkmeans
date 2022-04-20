@@ -387,7 +387,7 @@ double **calculate_T(double **eigenvectors, int k, int n){
 
 
 
-double **spectral_clustrering(double **datapoints, int n, int d){
+double **spectral_clustrering(double **datapoints, int n, int d, int k){
 /**
  * Preform the full spectral k-means algorithm, return k first eigenvectors.
  *
@@ -397,7 +397,6 @@ double **spectral_clustrering(double **datapoints, int n, int d){
  */    
     double **weights, *degree, **laplacian, *eigenvalues, **eigenvectors,
             *s_eigenvalues, **s_eigenvectors, **T;
-    int k;
     s_eigenvalues = (double *) calloc(n, sizeof (double));
     if (s_eigenvalues == NULL) {
         print_error();
@@ -409,7 +408,9 @@ double **spectral_clustrering(double **datapoints, int n, int d){
     eigenvectors = jacobi_function(laplacian, EPSILON, n);
     eigenvalues = get_diagonal(laplacian, n);
     sort_eigenvalues_and_vectors(eigenvalues, eigenvectors, s_eigenvalues, s_eigenvectors, n);
-    k = eigengap_hueuristic(s_eigenvalues, n);
+    if(k==0) {
+        k = eigengap_hueuristic(s_eigenvalues, n);
+    }
     T = calculate_T(s_eigenvectors, k, n);
     free(s_eigenvalues);
     free(s_eigenvectors);
@@ -485,7 +486,7 @@ int main(int argc, char *argv[]) {
     char *file_name, *goal;
     int n, d;
     double **eigen_vectors, **diagonal_degree_matrix_res, **lap_res, *degree,
-        **datapoints, **weight_adj_matrix_res, *eigenvalues, **centroids;
+        **datapoints, **weight_adj_matrix_res, *eigenvalues;
     if (argc != 3) {
         print_invalid_input();
 
@@ -519,6 +520,7 @@ int main(int argc, char *argv[]) {
     /* For testing: - delete after*/
     else if(strcmp(goal, "spk") == 0) {
 
+
     }
     else{
             printf("Invalid Input!");
@@ -526,3 +528,4 @@ int main(int argc, char *argv[]) {
     }
     return 0;
 }
+

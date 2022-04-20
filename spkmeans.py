@@ -101,23 +101,17 @@ def main():
     try:
         input_args = sys.argv
         if len(input_args) != 4:
-            # print("first condition")
             raise Exception
         k = int(input_args[1])
         if(k == 1):
             print("Invalid Input!")
             return
-        # print("k", k)
         goal = input_args[2]
-        # print("goal", goal)
         file = input_args[3]
         datapoints = pd.read_csv(file, header=None)
-        # print("data_pandas", datapoints)
         datapoints = datapoints.to_numpy().tolist()
-        # print("data_numpy", datapoints)
         n = len(datapoints)
         d = len(datapoints[0])
-        # print("n , k , d", n, k , d)
         if k >= len(datapoints) or k < 0:
             raise Exception
     except:
@@ -125,7 +119,7 @@ def main():
         return
     try:
         if goal == "spk":
-            T, heuristic_k = myspkmeans.get_goal(n, d, "spk_T_and_k", datapoints)
+            T, heuristic_k = myspkmeans.get_goal(n, d, k, "spk_T_and_k", datapoints)
             T = pd.DataFrame(T)
             if k == 0:
                 k = heuristic_k
@@ -135,15 +129,13 @@ def main():
             print(','.join(map(str, real_index)))
             print_results(np.array(kmeans_new_centroids))
         elif goal == "jacobi":
-            values_and_vectors = myspkmeans.get_goal(n, d, goal, datapoints)
-            # print("values_and_vectors\n")
+            values_and_vectors = myspkmeans.get_goal(n, d, k, goal, datapoints)
             values = values_and_vectors[0]  # diagonal matrix form
             vectors = values_and_vectors[1]
             print_eigenvalues(values)
             print_results(np.array(vectors))
         else:
-            # print("here is " + str(goal)+":\n")
-            print_results(np.array(myspkmeans.get_goal(n, d, goal, datapoints)))
+            print_results(np.array(myspkmeans.get_goal(n, d, k, goal, datapoints)))
     except:
         print(traceback.format_exc())
         print("An Error Has Occurred!")
