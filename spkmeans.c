@@ -364,10 +364,12 @@ void sort_eigenvalues_and_vectors(const double *eigenvalues, double **eigenvecto
         eigenvalues_idx[i].v = eigenvalues[i];
     }
     qsort(eigenvalues_idx, n, sizeof (eigenvalues_idx[0]), idx_cmp);
+    transpose(eigenvectors, n);
     for(i = 0; i<n; i++){
         s_eigenvalues[i] = eigenvalues[eigenvalues_idx[i].i];
         s_eigenvectors[i] = eigenvectors[eigenvalues_idx[i].i];
     }
+    transpose(s_eigenvectors, n);
     free(eigenvalues_idx);
 }
 
@@ -422,25 +424,16 @@ double **spectral_clustrering(double **datapoints, int n, int d, int k){
 
     eigenvectors = jacobi_function(laplacian, EPSILON, n);
     eigenvalues = get_diagonal(laplacian, n);
-    transpose(eigenvectors, n);
     sort_eigenvalues_and_vectors(eigenvalues, eigenvectors, s_eigenvalues, s_eigenvectors, n);
-    transpose(eigenvectors, n);
-
-
+    if(k==0) {
+        k = eigengap_hueuristic(s_eigenvalues, n);
+    }
+    T = calculate_T(s_eigenvectors, k, n);
     free(degree);
     free(weights[0]);
     free(weights);   
     free(laplacian[0]);
     free(laplacian);
-
-    sort_eigenvalues_and_vectors(eigenvalues, eigenvectors, s_eigenvalues, s_eigenvectors, n);
-    if(k==0) {
-        k = eigengap_hueuristic(s_eigenvalues, n);
-    }
-    
-
-    T = calculate_T(s_eigenvectors, k, n);
-    
     free(s_eigenvalues);   
     free(eigenvalues);
     free(eigenvectors[0]);

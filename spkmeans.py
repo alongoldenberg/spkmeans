@@ -17,23 +17,24 @@ def initial_centroids(datapoints, k):
     index = []
     n, d = datapoints.shape[0], datapoints.shape[1]
     centroids = np.zeros((k, d))
-    cur_chosen_m = datapoints[np.random.choice(n, size=1)]
+    rnd = np.random.choice(n, size=1)
+    cur_chosen_m = datapoints[rnd]
+    index.append(rnd[0])
     centroids[0] = cur_chosen_m
-    index.append(np.where(np.all(datapoints == cur_chosen_m, axis=1))[0][0])
     i = 1
     while i < k:
         distance_lst, distance_sum = calc_distances(centroids, datapoints, i, n)
         probs_lst = calc_probs(distance_lst, distance_sum)
         i += 1
-        centroids[i - 1] = rnd_select_m(probs_lst, datapoints)
-        index.append(np.where(np.all(datapoints == centroids[i - 1], axis=1))[0][0])
+        centroids[i - 1], rnd = rnd_select_m(probs_lst, datapoints)
+        index.append(rnd)
     return centroids, index
 
 
 def rnd_select_m(probs, datapoints):
     n = len(datapoints)
     idx = np.random.choice(np.arange(n), p=probs)
-    return datapoints[idx]
+    return datapoints[idx], idx
 
 
 def calc_cumulative_array(arr):
@@ -113,7 +114,7 @@ def main():
         datapoints = datapoints.to_numpy().tolist()
         n = len(datapoints)
         d = len(datapoints[0])
-        if k >= len(datapoints) or k < 0:
+        if k >= len(datapoints) or k < 0 or k == 1:
             raise Exception
     except:
         print("Invalid Input!")
@@ -126,10 +127,10 @@ def main():
             
             if k == 0:
                 k = heuristic_k
+                
             centroids, centroids_index = initial_centroids(T.to_numpy(), k)
-            real_index = [int(T.iloc[i].name) for i in centroids_index]
             kmeans_new_centroids = myspkmeans.kmeans(n, heuristic_k, k, T.values.tolist(), centroids.tolist())
-            print(','.join(map(str, real_index)))
+            print(",".join([str(x) for x in centroids_index]))
             print_results(np.array(kmeans_new_centroids))
         elif goal == "jacobi":
             values_and_vectors = myspkmeans.get_goal(n, d, k, goal, datapoints)
