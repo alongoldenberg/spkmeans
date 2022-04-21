@@ -251,12 +251,11 @@ void calc_p(double **p, int i, int j, double s, double c, int n){
  * @param s, c - values for the transformation
  * @param i,j - indices of the maximal number in A
  */
-    double tau, temp; int r;
-    tau = s / (1.0 + c);
+    double temp; int r;
     for(r=0; r<n; r++){
-        temp = p[r][i];
-        p[r][i] = temp - s*(p[r][j] + tau*p[r][i]);
-        p[r][j] = p[r][j] + s*(temp - tau*p[r][j]);
+        temp = p[r][i] * s + p[r][j] * c;
+        p[r][i] = p[r][i] * c - p[r][j] * s;
+        p[r][j] = temp;
     }
 }
 
@@ -365,21 +364,20 @@ double **calculate_T(double **eigenvectors, int k, int n){
     double **T, *norms, sum;
     int i,j;
     T = allocate_data(n, k);
-    norms = (double *) calloc(k, sizeof (double));
+    norms = (double *) calloc(n, sizeof (double));
     if (norms == NULL) {
         print_error();
     }
-
-    for (j=0;j<k;j++){
+    for (i=0;i<n;i++){
         sum = 0;
-        for(i=0;i<n;i++){
+        for(j=0;j<k;j++){
             sum+= pow(eigenvectors[i][j], 2);
         }
-        norms[j] = sqrt(sum);
+        norms[i] = sqrt(sum);
     }
     for (i=0;i<n;i++){
         for(j=0;j<k;j++){
-            T[i][j] = (eigenvectors[i][j] / norms[j]);
+            T[i][j] = (eigenvectors[i][j] / norms[i]);
         }
     }
     free(norms);
