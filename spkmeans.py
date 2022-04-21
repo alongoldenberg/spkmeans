@@ -120,13 +120,16 @@ def main():
         return
     try:
         if goal == "spk":
-            T, heuristic_k = myspkmeans.get_goal(n, d, k, "spk_T_and_k", datapoints)
+            T = myspkmeans.get_goal(n, d, k, "spk", datapoints)
+            heuristic_k = len(T[0])
             T = pd.DataFrame(T)
             print(T)
             if k == 0:
                 k = heuristic_k
             centroids, centroids_index = initial_centroids(T.to_numpy(), k)
+            real_index = [int(T.iloc[i].name) for i in centroids_index]
             kmeans_new_centroids = myspkmeans.kmeans(n, heuristic_k, k, T.values.tolist(), centroids.tolist())
+            print(','.join(map(str, real_index)))
             print_results(np.array(kmeans_new_centroids))
         elif goal == "jacobi":
             values_and_vectors = myspkmeans.get_goal(n, d, k, goal, datapoints)

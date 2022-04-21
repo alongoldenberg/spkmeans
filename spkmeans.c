@@ -16,6 +16,17 @@ typedef struct {
 } indexed_double;
 
 
+void transpose(double** A, int n){
+    int i; int j; double tmp;
+    for (i = 0; i < n - 1; i++){
+        for (j = i + 1; j < n; j++){
+            tmp = A[i][j];
+            A[i][j] = A[j][i];
+            A[j][i] = tmp;
+        }
+    }
+}
+
 double **parse_file(char *filename, int* n, int* d){
     /* Allocate memory and put data from file to a 2d array */
     FILE *data = NULL; double **arr; double num; int i,j;
@@ -152,7 +163,6 @@ double **jacobi_function(double **a, double eps, int n){
     p = identity_matrix(n);
     for(k=0;k<MAX_ROTATIONS;k++){
         off_diagonal = rotate_jacobian(a, a_tag, p, n);
-        printf("Rotation: %d", k);
         if(off_diagonal <= eps) {
             break;
         }
@@ -330,7 +340,7 @@ int eigengap_hueuristic(const double *eigenvaleus, int n){
     int max_diff_idx = 0, i;
     double max_diff = 0, diff;
     for (i = 0; i <= n / 2; i++) {
-        diff = eigenvaleus[i + 1] - eigenvaleus[i];
+        diff = fabs(eigenvaleus[i + 1] - eigenvaleus[i]);
         if (diff > max_diff) {
             max_diff = diff;
             max_diff_idx = i;
@@ -340,7 +350,7 @@ int eigengap_hueuristic(const double *eigenvaleus, int n){
 }
 
 void sort_eigenvalues_and_vectors(const double *eigenvalues, double **eigenvectors,
-                                         double * s_eigenvalues, double ** s_eigenvectors, int n){
+                                         double *s_eigenvalues, double **s_eigenvectors, int n){
     indexed_double *eigenvalues_idx;
     int i;
     eigenvalues_idx = (indexed_double *) calloc(n, sizeof (indexed_double));
@@ -404,22 +414,11 @@ double **spectral_clustrering(double **datapoints, int n, int d, int k){
     weights = weight_adj_matrix(datapoints, n, d);
     degree = diagonal_degree_matrix(weights, 1, n);
     laplacian = normalized_laplacian(weights, degree, n);
-    puts("laplacian");
-    print_matrix(laplacian, n, n);
-
     eigenvectors = jacobi_function(laplacian, EPSILON, n);
-    puts("eigenvectors");
-    print_matrix(eigenvectors, n, n);
-    
     eigenvalues = get_diagonal(laplacian, n);
+    transpose(eigenvectors, n);
     sort_eigenvalues_and_vectors(eigenvalues, eigenvectors, s_eigenvalues, s_eigenvectors, n);
-
-    puts("sorted eigenvectors");
-    print_matrix(s_eigenvectors, n, n);
-
-    puts("sorted e_values");
-    print_arr(s_eigenvalues, n);
-
+    transpose(eigenvectors, n);
     if(k==0) {
         k = eigengap_hueuristic(s_eigenvalues, n);
     }

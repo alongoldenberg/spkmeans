@@ -38,7 +38,7 @@ void sort_eigenvalues_and_vectors(const double *eigenvalues, double **eigenvecto
                                          double * s_eigenvalues, double ** s_eigenvectors, int n);
 double **calculate_T(double **eigenvectors, int k, int n);
 double **spectral_clustrering(double **datapoints, int n, int d, int k);
-
+void transpose(double** A, int n);
 
 
 #endif
