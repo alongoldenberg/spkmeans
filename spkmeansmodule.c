@@ -100,6 +100,9 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
         if(k==0){
             k = calculate_k(datapoints, n,d);
         }
+        if(k==1){
+            print_error();
+        }
         result = data_c_to_py_type(T, n, k);
         free(datapoints[0]);
         free(datapoints);
