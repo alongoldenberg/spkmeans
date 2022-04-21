@@ -123,7 +123,7 @@ def main():
             T = myspkmeans.get_goal(n, d, k, "spk", datapoints)
             heuristic_k = len(T[0])
             T = pd.DataFrame(T)
-            print(T)
+            
             if k == 0:
                 k = heuristic_k
             centroids, centroids_index = initial_centroids(T.to_numpy(), k)
