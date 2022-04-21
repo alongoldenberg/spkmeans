@@ -17,10 +17,35 @@ static double** data_py_to_c_type(PyObject* datapoints_py_type, int data_size_n,
 static PyObject* data_c_to_py_type(double** data_c_type, int data_size_n, int data_dimension);
 static PyObject* get_goal_capi(PyObject *self, PyObject *args);
 static PyObject* calc_kmeans_capi(PyObject *self, PyObject *args);
+static int calculate_k(double **datapoints, int n, int d);
 
 
+static int calculate_k(double **datapoints, int n, int d){
+/**
+ * Preform the full spectral k-means algorithm, return k first eigenvectors.
+ *
+ * @param datapoints - 2D array of datapoints size n*d.
+ * @invariant - n and d are initialized.
+  *@result T - requested matrix
+ */
+    double **weights, *degree, **laplacian, *eigenvalues, **eigenvectors,
+            *s_eigenvalues, **s_eigenvectors;
+    int k;
+    s_eigenvalues = (double *) calloc(n, sizeof (double));
+    if (s_eigenvalues == NULL) {
+        print_error();
+    }
+    s_eigenvectors = allocate_data(n, n);
+    weights = weight_adj_matrix(datapoints, n, d);
+    degree = diagonal_degree_matrix(weights, 1, n);
+    laplacian = normalized_laplacian(weights, degree, n);
+    eigenvectors = jacobi_function(laplacian, EPSILON, n);
+    eigenvalues = get_diagonal(laplacian, n);
+    sort_eigenvalues_and_vectors(eigenvalues, eigenvectors, s_eigenvalues, s_eigenvectors, n);
+    k = eigengap_hueuristic(s_eigenvalues, n);
 
-
+    return k;
+}
 
 static double** data_py_to_c_type(PyObject* datapoints_py_type, int data_size_n, int data_dimension){
     double **c_data_pointer; Py_ssize_t i, j;
@@ -72,6 +97,9 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
     if  (strcmp("spk", my_goal_c_type)==0){
         double **T;
         T = spectral_clustrering(datapoints, n, d, k);
+        if(k==0){
+            k = calculate_k(datapoints, n,d);
+        }
         result = data_c_to_py_type(T, n, k);
         free(datapoints[0]);
         free(datapoints);
