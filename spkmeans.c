@@ -391,7 +391,12 @@ double **calculate_T(double **eigenvectors, int k, int n){
     }
     for (i=0;i<n;i++){
         for(j=0;j<k;j++){
-            T[i][j] = (eigenvectors[i][j] / norms[i]);
+            if(norms[i] == 0){
+                T[i][j] = 0;
+            }
+            else {
+                T[i][j] = (eigenvectors[i][j] / norms[i]);
+            }
         }
     }
     free(norms);
