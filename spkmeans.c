@@ -144,6 +144,7 @@ double rotate_jacobian(double **a, double **a_tag, double **p, int n) {
     calc_a_tag(a, a_tag, s, c, i, j, n);
     calc_p(p, i, j, s, c, n);
     copy_matrix(a_tag, a, n);
+    free(max);
     return 2*(pow(max_value, 2));
 }
 
@@ -167,6 +168,7 @@ double **jacobi_function(double **a, double eps, int n){
             break;
         }
     }
+    free(a_tag[0]);
     free(a_tag);
     return p;
 }
@@ -413,9 +415,13 @@ double **spectral_clustrering(double **datapoints, int n, int d, int k){
         print_error();
     }
     s_eigenvectors = allocate_data(n, n);
+    if (s_eigenvectors == NULL) {
+        print_error();
+    }
     weights = weight_adj_matrix(datapoints, n, d);
     degree = diagonal_degree_matrix(weights, 1, n);
     laplacian = normalized_laplacian(weights, degree, n);
+
     eigenvectors = jacobi_function(laplacian, EPSILON, n);
     eigenvalues = get_diagonal(laplacian, n);
     sort_eigenvalues_and_vectors(eigenvalues, eigenvectors, s_eigenvalues, s_eigenvectors, n);
@@ -423,13 +429,16 @@ double **spectral_clustrering(double **datapoints, int n, int d, int k){
         k = eigengap_hueuristic(s_eigenvalues, n);
     }
     T = calculate_T(s_eigenvectors, k, n);
-    free(s_eigenvalues);
-    free(s_eigenvectors);
-    free(weights);
     free(degree);
+    free(weights[0]);
+    free(weights);   
+    free(laplacian[0]);
     free(laplacian);
-    free(eigenvectors);
+    free(s_eigenvalues);   
     free(eigenvalues);
+    free(eigenvectors[0]);
+    free(eigenvectors);
+    free(s_eigenvectors);
     return T;
 }
 
@@ -505,9 +514,12 @@ int main(int argc, char *argv[]) {
     goal = argv[1];
     file_name = argv[2];
     datapoints = parse_file(file_name, &n, &d);
+    
     if(strcmp(goal, "wam") == 0) {
         weight_adj_matrix_res = weight_adj_matrix(datapoints, n, d);
         print_matrix(weight_adj_matrix_res, n, n);
+        free(weight_adj_matrix_res[0]);
+        free(weight_adj_matrix_res);
     }
     else if(strcmp(goal, "ddg") == 0) {
 
@@ -515,23 +527,46 @@ int main(int argc, char *argv[]) {
         degree = diagonal_degree_matrix(weight_adj_matrix_res, 0, n);
         diagonal_degree_matrix_res = degree_to_diagonal_matrix(degree, n);
         print_matrix(diagonal_degree_matrix_res, n, n);
+        free(weight_adj_matrix_res[0]);
+        free(weight_adj_matrix_res);
+        free(diagonal_degree_matrix_res[0]);
+        free(diagonal_degree_matrix_res);
+        free(degree);
     }
     else if(strcmp(goal, "lnorm") == 0) {
         weight_adj_matrix_res = weight_adj_matrix(datapoints, n, d);
         degree = diagonal_degree_matrix(weight_adj_matrix_res, 1, n);
         lap_res = normalized_laplacian(weight_adj_matrix_res, degree, n);
         print_matrix(lap_res, n, n);
+        free(weight_adj_matrix_res[0]);
+        free(weight_adj_matrix_res);
+        free(degree);
+        free(lap_res[0]);
+        free(lap_res);
     }
     else if(strcmp(goal, "jacobi") == 0) {
+        if (n!=d){
+            printf("Invalid Input!\n");
+            free(datapoints[0]);
+            free(datapoints);
+            return 1;
+        }
         eigen_vectors = jacobi_function(datapoints, EPSILON, n);
         eigenvalues = get_diagonal(datapoints, n);
         print_arr(eigenvalues, n);
         print_matrix(eigen_vectors, n, n);
+        free(eigen_vectors[0]);
+        free(eigen_vectors);
+        free(eigenvalues);
     }
     else{
-            printf("Invalid Input!");
-            return 1;
+        printf("Invalid Input!\n");
+        free(datapoints[0]);
+        free(datapoints);
+        return 1;
     }
+    free(datapoints[0]);
+    free(datapoints);
     return 0;
 }
 
