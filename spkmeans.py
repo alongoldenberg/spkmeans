@@ -17,7 +17,7 @@ def initial_centroids(datapoints, k):
     n, d = datapoints.shape[0], datapoints.shape[1]
     centroids = np.zeros((k, d))
     rnd = np.random.choice(n, size=1)
-    cur_chosen_m = datapoints[rnd]
+    cur_chosen_m = datapoints[rnd[-1]]
     index.append(rnd[0])
     centroids[0] = cur_chosen_m
     i = 1
