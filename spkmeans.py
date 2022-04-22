@@ -91,9 +91,10 @@ def print_results(centroids):
 
 def print_eigenvalues(eigenvalues):
     diagonal = np.diag(np.array(eigenvalues))
+    diagonal = [round(num, 4) for num in diagonal]
     for i in range(len(diagonal)):
-        if diagonal[i] == -0.0000:
-            diagonal[i] = 0.0000
+        if diagonal[i] == 0: # find all 0 including -0.0
+            diagonal[i] = 0.0
     print(",".join('%.4f' % x for x in diagonal))
 
 
@@ -106,7 +107,7 @@ def main():
         k = int(input_args[1])
 
         if(k == 1):
-            print("Invalid Input!")
+            print("Invalid Input")
             return
         goal = input_args[2]
         file = input_args[3]
@@ -117,14 +118,13 @@ def main():
         if k >= len(datapoints) or k < 0 or k == 1:
             raise Exception
     except:
-        print("Invalid Input!")
+        print("Invalid Input")
         return
     try:
         if goal == "spk":
             T = myspkmeans.get_goal(n, d, k, "spk", datapoints)
             heuristic_k = len(T[0])
             T = pd.DataFrame(T)
-            
             if k == 0:
                 k = heuristic_k
                 
@@ -142,7 +142,7 @@ def main():
             print_results(np.array(myspkmeans.get_goal(n, d, k, goal, datapoints)))
     except:
         print(traceback.format_exc())
-        print("An Error Has Occurred!")
+        print("An Error Has Occurred")
 
 
 if __name__ == '__main__':
