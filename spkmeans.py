@@ -15,73 +15,29 @@ def initial_centroids(datapoints, k):
     return the random chosen centroids and their indices based on kmeans++ algorithem.
     """
     index = []
-    n, d = datapoints.shape[0], datapoints.shape[1]
+    n, d = datapoints.shape
     centroids = np.zeros((k, d))
     rnd = np.random.choice(n, size=1)
-    cur_chosen_m = datapoints[rnd]
+    cur_chosen_m = datapoints[rnd[-1]]
     index.append(rnd[0])
     centroids[0] = cur_chosen_m
     i = 1
     while i < k:
-        distance_lst, distance_sum = calc_distances(centroids, datapoints, i, n)
-        probs_lst = calc_probs(distance_lst, distance_sum)
+        D = calc_D(centroids, datapoints, i)
+        probs = D / D.sum()
         i += 1
-        centroids[i - 1], rnd = rnd_select_m(probs_lst, datapoints)
+        centroids[i - 1], rnd = rnd_select_m(probs, datapoints, n)
         index.append(rnd)
     return centroids, index
 
 
-def rnd_select_m(probs, datapoints):
-    n = len(datapoints)
+def rnd_select_m(probs, datapoints, n):
     idx = np.random.choice(np.arange(n), p=probs)
     return datapoints[idx], idx
 
 
-def calc_cumulative_array(arr):
-    res = [0 for i in range(len(arr))]
-    res[0] = arr[0]
-    j = 1
-    for num in arr[1:]:
-        res[j] = res[j - 1] + num
-    return res
-
-
-def calc_distances(centroids, datapoints, i, n):
-    """
-    Calculate distances of each datapoint from the centroids.
-    """
-    distance_lst = []
-    distance_sum = 0
-    for l in range(n):
-        cur_min_distance = sqr_distance(centroids[0], datapoints[l])
-        for j in range(i):
-            cur_min_distance = min(sqr_distance(centroids[j], datapoints[l]), cur_min_distance)
-        distance_lst.append(cur_min_distance)
-        distance_sum += cur_min_distance
-    return distance_lst, distance_sum
-
-
-def calc_probs(distance_lst, distance_sum):
-    """
-    :param distance_lst: list[int]
-    :param distance_sum: int
-    :return: The distributivity function of datapoints selection
-    """
-    res = []
-    n = len(distance_lst)
-    for l in range(n):
-        res.append(distance_lst[l] / distance_sum)
-    return res
-
-
-def sqr_distance(m, x):
-    """
-    Calcualte Square distnce between two d-dimensional points.
-    """
-    res = 0
-    for i in range(len(m)):
-        res += ((m[i] - x[i]) ** 2)
-    return res
+def calc_D(Mu, X, i):
+    return np.array([min([np.dot(x-m, x-m) for m in Mu[:i+1]]) for x in X])
 
 
 def print_results(centroids):
