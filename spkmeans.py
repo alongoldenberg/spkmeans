@@ -11,33 +11,51 @@ def initial_centroids(datapoints, k):
     __________
     datapoints: np.array(n,d)
     k: int
-
     return the random chosen centroids and their indices based on kmeans++ algorithem.
     """
     index = []
-    n, d = datapoints.shape
+    n, d = datapoints.shape[0], datapoints.shape[1]
     centroids = np.zeros((k, d))
     rnd = np.random.choice(n, size=1)
-    cur_chosen_m = datapoints[rnd[-1]]
+    cur_chosen_m = datapoints[rnd]
     index.append(rnd[0])
     centroids[0] = cur_chosen_m
     i = 1
     while i < k:
-        D = calc_D(centroids, datapoints, i)
-        probs = D / D.sum()
+        distance, distance_sum = calc_distances(centroids, datapoints, i, n)
+        probs = distance/distance_sum
         i += 1
-        centroids[i - 1], rnd = rnd_select_m(probs, datapoints, n)
+        centroids[i - 1], rnd = rnd_select_m(probs.tolist(), datapoints)
         index.append(rnd)
     return centroids, index
 
 
-def rnd_select_m(probs, datapoints, n):
+def rnd_select_m(probs, datapoints):
+    n = len(datapoints)
     idx = np.random.choice(np.arange(n), p=probs)
     return datapoints[idx], idx
 
 
-def calc_D(Mu, X, i):
-    return np.array([min([np.dot(x-m, x-m) for m in Mu[:i+1]]) for x in X])
+def calc_distances(centroids, datapoints, i, n):
+    """
+    Calculate distances of each datapoint from the centroids.
+    """
+    distance_lst = []
+    distance_sum = 0
+    for l in range(n):
+        cur_min_distance = sqr_distance(centroids[0], datapoints[l])
+        for j in range(i):
+            cur_min_distance = min(sqr_distance(centroids[j], datapoints[l]), cur_min_distance)
+        distance_lst.append(cur_min_distance)
+        distance_sum += cur_min_distance
+    return np.array(distance_lst), distance_sum
+
+
+def sqr_distance(m, x):
+    """
+    Calcualte Square distnce between two d-dimensional points.
+    """
+    return np.dot((m-x), (m-x))
 
 
 def print_results(centroids):
@@ -47,10 +65,9 @@ def print_results(centroids):
 
 def print_eigenvalues(eigenvalues):
     diagonal = np.diag(np.array(eigenvalues))
-    diagonal = [round(num, 4) for num in diagonal]
     for i in range(len(diagonal)):
-        if diagonal[i] == 0: # find all 0 including -0.0
-            diagonal[i] = 0.0
+        if diagonal[i] == -0.0000:
+            diagonal[i] = 0.0000
     print(",".join('%.4f' % x for x in diagonal))
 
 
@@ -62,8 +79,8 @@ def main():
             raise Exception
         k = int(input_args[1])
 
-        if(k == 1):
-            print("Invalid Input")
+        if (k == 1):
+            print("Invalid Input!")
             return
         goal = input_args[2]
         file = input_args[3]
@@ -74,16 +91,17 @@ def main():
         if k >= len(datapoints) or k < 0 or k == 1:
             raise Exception
     except:
-        print("Invalid Input")
+        print("Invalid Input!")
         return
     try:
         if goal == "spk":
             T = myspkmeans.get_goal(n, d, k, "spk", datapoints)
             heuristic_k = len(T[0])
             T = pd.DataFrame(T)
+
             if k == 0:
                 k = heuristic_k
-                
+
             centroids, centroids_index = initial_centroids(T.to_numpy(), k)
             kmeans_new_centroids = myspkmeans.kmeans(n, heuristic_k, k, T.values.tolist(), centroids.tolist())
             print(",".join([str(x) for x in centroids_index]))
@@ -98,7 +116,7 @@ def main():
             print_results(np.array(myspkmeans.get_goal(n, d, k, goal, datapoints)))
     except:
         print(traceback.format_exc())
-        print("An Error Has Occurred")
+        print("An Error Has Occurred!")
 
 
 if __name__ == '__main__':
