@@ -10,12 +10,6 @@
 #include <ctype.h>
 #include <math.h>
 
-typedef struct {
-    int i;
-    double v;
-} indexed_double;
-
-
 void transpose(double** A, int n){
     int i; int j; double tmp;
     for (i = 0; i < n - 1; i++){

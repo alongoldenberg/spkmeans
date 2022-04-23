@@ -10,8 +10,12 @@
 #define LEN(arr) ((int) (sizeof (arr) / sizeof (arr)[0]))
 #define MAX_ROTATIONS 100
 #define MAX_ITER 300
-#define EPSILON exp(-15)
+#define EPSILON pow(10,-5)
 
+typedef struct {
+    int i;
+    double v;
+} indexed_double;
 
 double **allocate_data(int n, int d);
 double **parse_file(char *filename, int *n, int *d);
