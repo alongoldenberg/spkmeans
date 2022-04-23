@@ -45,7 +45,8 @@ def calc_distances(centroids, datapoints, i, n):
     for l in range(n):
         cur_min_distance = sqr_distance(centroids[0], datapoints[l])
         for j in range(i):
-            cur_min_distance = min(sqr_distance(centroids[j], datapoints[l]), cur_min_distance)
+            cur_min_distance = min(sqr_distance(centroids[j], datapoints[l]),
+                                   cur_min_distance)
         distance_lst.append(cur_min_distance)
         distance_sum += cur_min_distance
     return np.array(distance_lst), distance_sum
@@ -81,8 +82,7 @@ def main():
         k = int(input_args[1])
 
         if (k == 1):
-            print("Invalid Input!")
-            return
+            raise Exception
         goal = input_args[2]
         file = input_args[3]
         datapoints = pd.read_csv(file, header=None)
@@ -104,20 +104,24 @@ def main():
                 k = heuristic_k
 
             centroids, centroids_index = initial_centroids(T.to_numpy(), k)
-            kmeans_new_centroids = myspkmeans.kmeans(n, heuristic_k, k, T.values.tolist(), centroids.tolist())
+            kmeans_new_centroids = myspkmeans.kmeans(n, heuristic_k, k,
+                                                     T.values.tolist(),
+                                                     centroids.tolist())
             print(",".join([str(x) for x in centroids_index]))
             print_results(np.array(kmeans_new_centroids))
         elif goal == "jacobi":
-            values_and_vectors = myspkmeans.get_goal(n, d, k, goal, datapoints)
+            values_and_vectors = myspkmeans.get_goal(n, d, k, goal,
+                                                     datapoints)
             values = values_and_vectors[0]  # diagonal matrix form
             vectors = values_and_vectors[1]
             print_eigenvalues(values)
             print_results(np.array(vectors))
         else:
-            print_results(np.array(myspkmeans.get_goal(n, d, k, goal, datapoints)))
+            print_results(np.array(myspkmeans.get_goal(n, d, k, goal,
+                                                       datapoints)))
     except:
         print(traceback.format_exc())
-        print("An Error Has Occurred!")
+        print("An Error Has Occurred")
 
 
 if __name__ == '__main__':

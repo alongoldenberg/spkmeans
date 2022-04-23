@@ -40,7 +40,7 @@ void print_error(void){
 
 
 void print_invalid_input(void){
-    printf("Invalid Input\n");
+    printf("Invalid Input!\n");
     exit(1);
 }
 
