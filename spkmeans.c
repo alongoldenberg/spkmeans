@@ -44,7 +44,6 @@ double **parse_file(char *filename, int* n, int* d){
 }
 
 
-
 double **weight_adj_matrix(double **datapoints, int n, int d){
 /**
  * Calculate Weights Matrix
@@ -68,7 +67,6 @@ double **weight_adj_matrix(double **datapoints, int n, int d){
     }
     return weights;
 }
-
 
 
 double *diagonal_degree_matrix(double **weights, char sq, int n){
@@ -195,6 +193,7 @@ double sign(double x) {
     return s;
 }
 
+
 void max_off_diagonal(double **m, int n, int *max_i, int *max_j){
 /**
  * Finds the indices of the maximum double in a matrix
@@ -317,7 +316,6 @@ int idx_cmp( const void* a, const void* b)
 }
 
 
-
 int eigengap_hueuristic(const double *eigenvaleus, int n){
 /**
  * Preform the eigengap heuristic: given a set of 
@@ -390,7 +388,6 @@ double **calculate_T(double **eigenvectors, int k, int n){
     free(norms);
     return T;
 }
-
 
 
 double **spectral_clustrering(double **datapoints, int n, int d, int k){
@@ -509,7 +506,6 @@ int main(int argc, char *argv[]) {
         **datapoints, **weight_adj_matrix_res, *eigenvalues;
     if (argc != 3) {
         print_invalid_input();
-
     }
     goal = argv[1];
     file_name = argv[2];

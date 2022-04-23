@@ -33,6 +33,7 @@ double **allocate_data(int n, int d) {
     return a;
 }
 
+
 void print_error(void){
     printf("An Error Has Occurred\n");
     exit(1);
@@ -54,6 +55,7 @@ int check_is_num(char *str) {
     return 1;
 }
 
+
 void print_matrix(double **matrix, int n, int d) {
     int i, j;
     for (i = 0; i < n; i++) {
@@ -68,6 +70,7 @@ void print_matrix(double **matrix, int n, int d) {
         printf("\n");
     }
 }
+
 
 void print_arr(double *arr, int n) {
     int i;
@@ -100,16 +103,17 @@ void print_eigenvalues(double *arr, int n) {
 }
 
 
-
 int count_lines(FILE *file) {
     char c = 0;
     int n = 0;
     while ((c = fgetc(file) ) != EOF){
-        if(c=='\n')
+        if(c=='\n'){
             n++;
+        }
     }
     return n;
 }
+
 
 int count_d(FILE *pFile) {
     int d, c=0;

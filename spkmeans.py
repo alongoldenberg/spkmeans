@@ -2,7 +2,6 @@ import sys
 import numpy as np
 import pandas as pd
 import myspkmeans
-import traceback
 
 
 def initial_centroids(datapoints, k):
@@ -75,21 +74,21 @@ def print_eigenvalues(eigenvalues):
 
 def main():
     np.random.seed(0)
+    valid_goals = {"wam", "ddg", "lnorm", "jacobi", "spk"}
     try:
         input_args = sys.argv
         if len(input_args) != 4:
             raise Exception
         k = int(input_args[1])
-
-        if (k == 1):
-            raise Exception
         goal = input_args[2]
+        if goal not in valid_goals:
+            raise Exception
         file = input_args[3]
         datapoints = pd.read_csv(file, header=None)
         datapoints = datapoints.to_numpy().tolist()
         n = len(datapoints)
         d = len(datapoints[0])
-        if k >= len(datapoints) or k < 0 or k == 1:
+        if (goal == "spk") and (k >= len(datapoints) or k < 0 or k==1):
             raise Exception
     except:
         print("Invalid Input!")
@@ -99,10 +98,8 @@ def main():
             T = myspkmeans.get_goal(n, d, k, "spk", datapoints)
             heuristic_k = len(T[0])
             T = pd.DataFrame(T)
-
             if k == 0:
                 k = heuristic_k
-
             centroids, centroids_index = initial_centroids(T.to_numpy(), k)
             kmeans_new_centroids = myspkmeans.kmeans(n, heuristic_k, k,
                                                      T.values.tolist(),
@@ -120,7 +117,6 @@ def main():
             print_results(np.array(myspkmeans.get_goal(n, d, k, goal,
                                                        datapoints)))
     except:
-        print(traceback.format_exc())
         print("An Error Has Occurred")
 
 

@@ -2,10 +2,8 @@
 
 #define PY_SSIZE_T_CLEAN
 #define PY_SSIZE_T_CLEAN  
-#include <Python.h>       
-                            
+#include <Python.h>                                  
 #include <math.h>         
-
 #include "utils.h"
 #include "spkmeans.h"
 #include <stdio.h>
@@ -60,6 +58,7 @@ static int calculate_k(double **datapoints, int n, int d){
     return k;
 }
 
+
 static double** data_py_to_c_type(PyObject* datapoints_py_type,
                                   int data_size_n, int data_dimension){
     double **c_data_pointer; Py_ssize_t i, j;
@@ -79,6 +78,7 @@ static double** data_py_to_c_type(PyObject* datapoints_py_type,
     }
     return c_data_pointer;
 }
+
 
 static PyObject* data_c_to_py_type(double** data_c_type,
                                    int data_size_n, int data_dimension){
