@@ -1,10 +1,10 @@
 
 
 #define PY_SSIZE_T_CLEAN
-#define PY_SSIZE_T_CLEAN  /* For all # variants of unit formats (s#, y#, etc.) use Py_ssize_t rather than int. */
-#include <Python.h>       /* MUST include <Python.h>, this implies inclusion of the following standard headers:
-                             <stdio.h>, <string.h>, <errno.h>, <limits.h>, <assert.h> and <stdlib.h> (if available). */
-#include <math.h>         /* include <Python.h> has to be before any standard headers are included */
+#define PY_SSIZE_T_CLEAN  
+#include <Python.h>       
+                            
+#include <math.h>         
 
 #include "utils.h"
 #include "spkmeans.h"
@@ -13,8 +13,10 @@
 #include <string.h>
 #include <ctype.h>
 
-static double** data_py_to_c_type(PyObject* datapoints_py_type, int data_size_n, int data_dimension);
-static PyObject* data_c_to_py_type(double** data_c_type, int data_size_n, int data_dimension);
+static double** data_py_to_c_type(PyObject* datapoints_py_type,
+                                 int data_size_n, int data_dimension);
+static PyObject* data_c_to_py_type(double** data_c_type,
+                                   int data_size_n, int data_dimension);
 static PyObject* get_goal_capi(PyObject *self, PyObject *args);
 static PyObject* calc_kmeans_capi(PyObject *self, PyObject *args);
 static int calculate_k(double **datapoints, int n, int d);
@@ -41,7 +43,8 @@ static int calculate_k(double **datapoints, int n, int d){
     laplacian = normalized_laplacian(weights, degree, n);
     eigenvectors = jacobi_function(laplacian, EPSILON, n);
     eigenvalues = get_diagonal(laplacian, n);
-    sort_eigenvalues_and_vectors(eigenvalues, eigenvectors, s_eigenvalues, s_eigenvectors, n);
+    sort_eigenvalues_and_vectors(eigenvalues, eigenvectors,
+                                s_eigenvalues, s_eigenvectors, n);
     k = eigengap_hueuristic(s_eigenvalues, n);
     
     free(weights[0]);
@@ -57,7 +60,8 @@ static int calculate_k(double **datapoints, int n, int d){
     return k;
 }
 
-static double** data_py_to_c_type(PyObject* datapoints_py_type, int data_size_n, int data_dimension){
+static double** data_py_to_c_type(PyObject* datapoints_py_type,
+                                  int data_size_n, int data_dimension){
     double **c_data_pointer; Py_ssize_t i, j;
     PyObject *py_point_vector;
     c_data_pointer = allocate_data(data_size_n, data_dimension);
@@ -69,13 +73,15 @@ static double** data_py_to_c_type(PyObject* datapoints_py_type, int data_size_n,
             return NULL;
             }
         for (j=0; j < data_dimension; j++){
-            c_data_pointer[i][j] = PyFloat_AsDouble(PyList_GetItem(py_point_vector, j));
+            c_data_pointer[i][j] = PyFloat_AsDouble(PyList_GetItem(
+                                                    py_point_vector, j));
         }
     }
     return c_data_pointer;
 }
 
-static PyObject* data_c_to_py_type(double** data_c_type, int data_size_n, int data_dimension){
+static PyObject* data_c_to_py_type(double** data_c_type,
+                                   int data_size_n, int data_dimension){
     PyObject* py_data_pointer = PyList_New(0);
     int i, j;
     PyObject* py_point_vector;
@@ -95,7 +101,8 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
     char* my_goal_c_type;
     int n, d, k;
     double **datapoints; 
-    if(!PyArg_ParseTuple(args, "iiisO:get_goal", &n, &d, &k, &my_goal_c_type, &datapoints_py_type)) {
+    if(!PyArg_ParseTuple(args, "iiisO:get_goal", &n, &d, &k,
+                         &my_goal_c_type, &datapoints_py_type)) {
         return NULL; 
     }
     if (!PyList_Check(datapoints_py_type)){
@@ -154,7 +161,9 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
     else if(strcmp(my_goal_c_type, "jacobi") == 0) {
         double **eigen_vectors;
         PyObject *eigen_vectors_py, *datapoints_py_type; 
-        eigen_vectors = jacobi_function(datapoints, EPSILON, n);  /*here datapoints is symitric matrix with eignvalues over the diagonal*/
+
+        /*here datapoints is symitric matrix with eignvalues over the diagonal*/
+        eigen_vectors = jacobi_function(datapoints, EPSILON, n); 
         eigen_vectors_py = data_c_to_py_type(eigen_vectors, n, n);
         datapoints_py_type = data_c_to_py_type(datapoints, n, n);
         free(eigen_vectors[0]);
@@ -182,7 +191,8 @@ static PyObject* calc_kmeans_capi(PyObject *self, PyObject *args){
     double** centroids;
     int n, d, k, eps;
     eps = 0; // Default Value
-    if(!PyArg_ParseTuple(args, "iiiOO:calc_kmeans", &n, &d, &k, &datapoints_py_type, &centroids_py_type)) {
+    if(!PyArg_ParseTuple(args, "iiiOO:calc_kmeans", &n, &d, &k,
+                         &datapoints_py_type, &centroids_py_type)) {
         return NULL; 
     }
     if (!PyList_Check(datapoints_py_type)){

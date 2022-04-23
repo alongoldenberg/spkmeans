@@ -320,7 +320,8 @@ int idx_cmp( const void* a, const void* b)
 
 int eigengap_hueuristic(const double *eigenvaleus, int n){
 /**
- * Preform the eigengap heuristic: given a set of eigenvalues return max idx difference of sorted eigenvalues
+ * Preform the eigengap heuristic: given a set of 
+ * eigenvalues return max idx difference of sorted eigenvalues
  *
  * @param eigenvalues - sorted eigenvalues array
   *@result max_diff  - the maximal difference idx in 1-(n/2) smallest eigenvalues
@@ -337,8 +338,9 @@ int eigengap_hueuristic(const double *eigenvaleus, int n){
     return max_diff_idx + 1;
 }
 
+
 void sort_eigenvalues_and_vectors(const double *eigenvalues, double **eigenvectors,
-                                         double *s_eigenvalues, double **s_eigenvectors, int n){
+                                double *s_eigenvalues, double **s_eigenvectors, int n){
     indexed_double *eigenvalues_idx;
     int i;
     eigenvalues_idx = (indexed_double *) calloc(n, sizeof (indexed_double));
@@ -415,7 +417,8 @@ double **spectral_clustrering(double **datapoints, int n, int d, int k){
 
     eigenvectors = jacobi_function(laplacian, EPSILON, n);
     eigenvalues = get_diagonal(laplacian, n);
-    sort_eigenvalues_and_vectors(eigenvalues, eigenvectors, s_eigenvalues, s_eigenvectors, n);
+    sort_eigenvalues_and_vectors(eigenvalues, eigenvectors,
+                                s_eigenvalues, s_eigenvectors, n);
     if(k==0) {
         k = eigengap_hueuristic(s_eigenvalues, n);
     }
@@ -435,7 +438,9 @@ double **spectral_clustrering(double **datapoints, int n, int d, int k){
 
 
 /*kmeans from first and second exc:*/
-double **kmeans(double **datapoints, double **centroids, int k, int max_iter, double epsilon, int n, int d) {
+double **kmeans(double **datapoints, double **centroids,
+                int k, int max_iter, double epsilon, int n, int d) {
+
     double max_change; int iterations=0;
     do{
         max_change = update_centroids(centroids, datapoints, k, n, d);
@@ -445,8 +450,11 @@ double **kmeans(double **datapoints, double **centroids, int k, int max_iter, do
 }
 
 
-double update_centroids(double **centroids, double **datapoints, int k, int n, int d){
-    double **cumulative_sums; double *counters; int chosen_m_idx; double max_change=0; double *old_centroid; int i,j;
+double update_centroids(double **centroids, double **datapoints,
+                        int k, int n, int d){
+
+    double **cumulative_sums; double *counters; int chosen_m_idx;
+    double max_change=0; double *old_centroid; int i,j;
     counters = (double*) calloc(k*sizeof(double), sizeof(double));
     if (counters == NULL) {
         print_error();
@@ -455,8 +463,9 @@ double update_centroids(double **centroids, double **datapoints, int k, int n, i
     for (i=0; i<n; i++){
         chosen_m_idx = 0;
         for (j=0; j<k; j++){
-            if (distance(centroids[j], datapoints[i], d) < distance(centroids[chosen_m_idx], datapoints[i], d)){
-                chosen_m_idx = j;
+            if (distance(centroids[j], datapoints[i], d) <
+                 distance(centroids[chosen_m_idx], datapoints[i], d)){
+                    chosen_m_idx = j;
             }
         }
         update_cumulative_sums(datapoints[i], cumulative_sums[chosen_m_idx], d);
@@ -537,7 +546,7 @@ int main(int argc, char *argv[]) {
     }
     else if(strcmp(goal, "jacobi") == 0) {
         if (n!=d){
-            printf("Invalid Input\n");
+            printf("Invalid Input!\n");
             free(datapoints[0]);
             free(datapoints);
             return 1;
@@ -551,7 +560,7 @@ int main(int argc, char *argv[]) {
         free(eigen_vectors);
     }
     else{
-        printf("Invalid Input\n");
+        printf("Invalid Input!\n");
         free(datapoints[0]);
         free(datapoints);
         return 1;

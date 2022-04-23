@@ -82,8 +82,7 @@ def main():
         k = int(input_args[1])
 
         if (k == 1):
-            print("Invalid Input!")
-            return
+            raise Exception
         goal = input_args[2]
         file = input_args[3]
         datapoints = pd.read_csv(file, header=None)
@@ -122,7 +121,7 @@ def main():
                                                        datapoints)))
     except:
         print(traceback.format_exc())
-        print("An Error Has Occurred!")
+        print("An Error Has Occurred")
 
 
 if __name__ == '__main__':
