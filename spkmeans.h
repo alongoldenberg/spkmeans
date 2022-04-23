@@ -13,6 +13,7 @@
 #define EPSILON pow(10,-5)
 
 typedef struct {
+    /* A structure containing index and value */
     int i;
     double v;
 } indexed_double;
@@ -47,6 +48,5 @@ void sort_eigenvalues_and_vectors(const double *eigenvalues,
 double **calculate_T(double **eigenvectors, int k, int n);
 double **spectral_clustrering(double **datapoints, int n, int d, int k);
 void transpose(double** A, int n);
-
 
 #endif
