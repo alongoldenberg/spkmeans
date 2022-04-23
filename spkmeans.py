@@ -65,9 +65,10 @@ def print_results(centroids):
 
 def print_eigenvalues(eigenvalues):
     diagonal = np.diag(np.array(eigenvalues))
+    diagonal = [round(num, 4) for num in diagonal]
     for i in range(len(diagonal)):
-        if diagonal[i] == -0.0000:
-            diagonal[i] = 0.0000
+        if diagonal[i] == 0:  # find all 0 including -0.0
+            diagonal[i] = 0.0
     print(",".join('%.4f' % x for x in diagonal))
 
 
