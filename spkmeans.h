@@ -23,7 +23,7 @@ double **jacobi_function(double **a, double eps, int n);
 double calc_c(double t);
 double calc_t(double **m, int i, int j);
 double sign(double x);
-void *max_off_diagonal(double **m, int n, int *max_i, int *max_j);
+void max_off_diagonal(double **m, int n, int *max_i, int *max_j);
 void calc_a_tag(double **a, double **a_tag, double s, double c, int i, int j, int n);
 void calc_p(double **p, int i, int j, double s, double c, int n);
 void copy_matrix(double **m, double **c, int n);

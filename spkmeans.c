@@ -201,7 +201,7 @@ double sign(double x) {
     return s;
 }
 
-void *max_off_diagonal(double **m, int n, int *max_i, int *max_j){
+void max_off_diagonal(double **m, int n, int *max_i, int *max_j){
 /**
  * Finds the indices of the maximum double in a matrix
  *
