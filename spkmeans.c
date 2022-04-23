@@ -131,9 +131,10 @@ double **normalized_laplacian(double **weights, const double *degree, int n){
 
 
 double rotate_jacobian(double **a, double **a_tag, double **p, int n) {
-    int i, j; double s, c, t; int *max; double max_value;
-    max = max_off_diagonal(a, n);
-    i = max[0], j=max[1];
+    int i, j; double s, c, t; double max_value;
+    i=0;
+    j=0;
+    max_off_diagonal(a, n, &i, &j);
     if (a[i][j]==0){
         return 0;
     }
@@ -144,7 +145,6 @@ double rotate_jacobian(double **a, double **a_tag, double **p, int n) {
     calc_a_tag(a, a_tag, s, c, i, j, n);
     calc_p(p, i, j, s, c, n);
     copy_matrix(a_tag, a, n);
-    free(max);
     return 2*(pow(max_value, 2));
 }
 
@@ -201,30 +201,22 @@ double sign(double x) {
     return s;
 }
 
-int *max_off_diagonal(double **m, int n){
+void *max_off_diagonal(double **m, int n, int *max_i, int *max_j){
 /**
  * Finds the indices of the maximum double in a matrix
  *
  * @param m - n*n matrix
- * @return [i,j] - 2-array of int representing row and column of the maximal double
  */
-    int *res; double max = 0; int i,j;
-    res =  (int*) calloc(2, sizeof(int));
-    if (res == NULL) {
-        print_error();
-    }
-    res[0] = 0;
-    res[1] = 1;
+    double max = 0; int i,j;
     for(i=0;i<n;i++){
         for(j=i+1;j<n;j++){
             if (fabs(m[i][j]) > fabs(max)){
                 max = m[i][j];
-                res[0] = i;
-                res[1] = j;
+                *max_i = i;
+                *max_j = j;
             }
         }
     }
-    return res;
 }
 
 
