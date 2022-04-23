@@ -11,6 +11,7 @@
 #include <math.h>
 
 void transpose(double** A, int n){
+    /* Efficiently transpose a matrix */
     int i; int j; double tmp;
     for (i = 0; i < n - 1; i++){
         for (j = i + 1; j < n; j++){
@@ -49,6 +50,8 @@ double **weight_adj_matrix(double **datapoints, int n, int d){
  * Calculate Weights Matrix
  *
  * @param datapoints - n*d matrix
+ * @param n - number of rows
+ * @param d - number of columns
  * @return Weights matrix - n*n matrix where W[i,j] = weight between datapoint i and j
  */
     int i, j; double dist, w; double ** weights;
@@ -75,6 +78,7 @@ double *diagonal_degree_matrix(double **weights, char sq, int n){
  *
  * @param weights - n*n weights matrix
  * @param sq - if !=0, return D**-0.5
+ * @param n - size of the matrix
  * @return degree array - n sized array where d[i] = degree of datapoint i
  * Note: this function returns a 1D array but is considered as 2D with A[i][i] = m[i] with 0 else.
  */
@@ -103,6 +107,7 @@ double **normalized_laplacian(double **weights, const double *degree, int n){
  *
  * @param weights - n*n weights matrix
  * @param degree - n size degree array
+ * @param n - size of the matrix
  * @return normalized laplacian matrix - n*n matrix representing the normalized laplacian
  */
     int i,j; double **lap; double x;
@@ -123,6 +128,7 @@ double **normalized_laplacian(double **weights, const double *degree, int n){
 
 
 double rotate_jacobian(double **a, double **a_tag, double **p, int n) {
+    /* Perform jacobian rotation as part of the Jacobian algorithm */
     int i, j; double s, c, t; double max_value;
     i=0;
     j=1;
@@ -147,6 +153,7 @@ double **jacobi_function(double **a, double eps, int n){
  *
  * @param a - n*n real symmetric matrix
  * @param eps - tolerance for the difference between rotation matrices
+ * @param n - size of the matrix
  * @return **vectors  -  2D array with the eighenvectors as columns
  */
     int k; double off_diagonal;
@@ -154,6 +161,7 @@ double **jacobi_function(double **a, double eps, int n){
     a_tag = allocate_data(n, n);
     copy_matrix(a, a_tag, n);
     p = identity_matrix(n);
+    /* Preform rotations until reaching max iterations or max_change <= epsilon */
     for(k=0;k<MAX_ROTATIONS;k++){
         off_diagonal = rotate_jacobian(a, a_tag, p, n);
         if(off_diagonal <= eps) {
@@ -199,6 +207,8 @@ void max_off_diagonal(double **m, int n, int *max_i, int *max_j){
  * Finds the indices of the maximum double in a matrix
  *
  * @param m - n*n matrix
+ * @param n - size of the matrix
+ * @param max_i, max_j - int pointers to insert the max value indices
  */
     double max = 0; int i,j;
     for(i=0;i<n;i++){
@@ -221,6 +231,7 @@ void calc_a_tag(double **a, double **a_tag, double s, double c, int i, int j, in
  * @param a_tag - n*n empty matrix to be filled with values
  * @param s, c - values for the transformation
  * @param i,j - indices of the maximal number in A
+ * @param n - size of the matrix
  * @return off - off-diagonal difference between A and A', based on
  */
     int r;
@@ -247,6 +258,7 @@ void calc_p(double **p, int i, int j, double s, double c, int n){
  * @param p - n*n matrix representing current rotation matrix
  * @param s, c - values for the transformation
  * @param i,j - indices of the maximal number in A
+ * @param n - size of the matrix
  */
     double temp; int r;
     for(r=0; r<n; r++){
@@ -258,6 +270,7 @@ void calc_p(double **p, int i, int j, double s, double c, int n){
 
 
 void copy_matrix(double **m, double **c, int n) {
+    /* Copy values of matrix M to matrix C */
     int i, j;
     for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
@@ -268,6 +281,7 @@ void copy_matrix(double **m, double **c, int n) {
 
 
 double **identity_matrix(int n) {
+    /* Returns identity matrix of size n */
     double **identity; int i;
     identity = allocate_data(n, n);
     for (i = 0; i < n; i++) {
@@ -278,6 +292,7 @@ double **identity_matrix(int n) {
 
 
 double *get_diagonal(double **m, int n) {
+    /* Given a symmetric function return it's diagonal as an array  */
     double *diagonal; int i;
     diagonal = (double *)calloc(n, sizeof(double ));
     if (diagonal == NULL) {
@@ -291,6 +306,7 @@ double *get_diagonal(double **m, int n) {
 
 
 double **degree_to_diagonal_matrix(const double *degree, int n){
+    /* Given an array of returns a zero matrix with the values on the diagonal */
     double **diagonal_degree_matrix_res;
     int i;
     diagonal_degree_matrix_res = allocate_data(n, n);
@@ -301,9 +317,8 @@ double **degree_to_diagonal_matrix(const double *degree, int n){
 }
 
 
-int idx_cmp( const void* a, const void* b)
-{
-
+int idx_cmp( const void* a, const void* b){
+    /* Compare function to sort indexed value array */
     indexed_double *x = (indexed_double *) a;
     indexed_double *y = (indexed_double *) b;
 
@@ -322,6 +337,7 @@ int eigengap_hueuristic(const double *eigenvaleus, int n){
  * eigenvalues return max idx difference of sorted eigenvalues
  *
  * @param eigenvalues - sorted eigenvalues array
+ * @param n - size of the matrix
   *@result max_diff  - the maximal difference idx in 1-(n/2) smallest eigenvalues
  */
     int max_diff_idx = 0, i;
@@ -339,6 +355,7 @@ int eigengap_hueuristic(const double *eigenvaleus, int n){
 
 void sort_eigenvalues_and_vectors(const double *eigenvalues, double **eigenvectors,
                                 double *s_eigenvalues, double **s_eigenvectors, int n){
+    /* Sort simultaneously array of eigenvalues and their corresponding eigenvectors */
     indexed_double *eigenvalues_idx;
     int i;
     eigenvalues_idx = (indexed_double *) calloc(n, sizeof (indexed_double));
@@ -361,6 +378,14 @@ void sort_eigenvalues_and_vectors(const double *eigenvalues, double **eigenvecto
 
 
 double **calculate_T(double **eigenvectors, int k, int n){
+    /**
+     * Calculate the matrix T from eigenvectors matrix
+     *
+     * @param eigenvectors - sorted eigenvectors array
+     * @param k - the choosen k for the spk algorithm
+     * @param n - the dimension of the matrix
+      *@result T - the T matrix based on the eigenvalues
+     */
     double **T, *norms, sum;
     int i,j;
     T = allocate_data(n, k);
@@ -375,6 +400,7 @@ double **calculate_T(double **eigenvectors, int k, int n){
         }
         norms[i] = sqrt(sum);
     }
+    /* Normalize T rows to length 1 */
     for (i=0;i<n;i++){
         for(j=0;j<k;j++){
             if(norms[i] == 0){
@@ -395,8 +421,11 @@ double **spectral_clustrering(double **datapoints, int n, int d, int k){
  * Preform the full spectral k-means algorithm, return k first eigenvectors.
  *
  * @param datapoints - 2D array of datapoints size n*d.
- * @invariant - n and d are initialized.
-  *@result T - requested matrix 
+ * @param n - 2D array of datapoints size n*d.
+ * @param n - number of rows
+ * @param d - number of columns
+ * @param k - if 0 calculate using eigengap heuristic, else chosen k
+ * @result T - requested matrix
  */    
     double **weights, *degree, **laplacian, *eigenvalues, **eigenvectors,
             *s_eigenvalues, **s_eigenvectors, **T;
@@ -408,6 +437,7 @@ double **spectral_clustrering(double **datapoints, int n, int d, int k){
     if (s_eigenvectors == NULL) {
         print_error();
     }
+    /* Calculate normalize laplacian matrix */
     weights = weight_adj_matrix(datapoints, n, d);
     degree = diagonal_degree_matrix(weights, 1, n);
     laplacian = normalized_laplacian(weights, degree, n);
@@ -437,7 +467,18 @@ double **spectral_clustrering(double **datapoints, int n, int d, int k){
 /*kmeans from first and second exc:*/
 double **kmeans(double **datapoints, double **centroids,
                 int k, int max_iter, double epsilon, int n, int d) {
-
+/**
+ * Choose K centroids from datapoints using kmeans algorithm
+ *
+ * @param datapoints - 2D array of datapoints size n*d.
+ * @param n - number of rows
+ * @param d - number of columns
+ * @param k - if 0 calculate using eigengap heuristic, else chosen k
+ * @param centroids - 2D array of initial centroids
+ * @param max_iter - maximum number of iteration to preform.
+ * @param epsilon - maximum distance from a datapoint to a centroid.
+ * @result centroids - new chosen centroids
+ */
     double max_change; int iterations=0;
     do{
         max_change = update_centroids(centroids, datapoints, k, n, d);
@@ -449,7 +490,16 @@ double **kmeans(double **datapoints, double **centroids,
 
 double update_centroids(double **centroids, double **datapoints,
                         int k, int n, int d){
-
+/**
+ * Update centroids based on kmeans algorithm
+ *
+ * @param datapoints - 2D array of datapoints size n*d.
+ * @param n - 2D array of datapoints size n*d.
+ * @param d - number of columns
+ * @param k - if 0 calculate using eigengap heuristic, else chosen k
+ * @param centroids - 2D array of initial centroids
+ * @result max_change - distance between old centroids and new ones
+ */
     double **cumulative_sums; double *counters; int chosen_m_idx;
     double max_change=0; double *old_centroid; int i,j;
     counters = (double*) calloc(k*sizeof(double), sizeof(double));
@@ -492,6 +542,7 @@ double update_centroids(double **centroids, double **datapoints,
 
 
 void update_cumulative_sums(const double *arr, double *cumulative_sum, int d){
+    /* update cumulative sum of an array */
     int i;
     for (i=0; i<d; i++){
         cumulative_sum[i] += arr[i];
@@ -565,4 +616,3 @@ int main(int argc, char *argv[]) {
     free(datapoints);
     return 0;
 }
-
