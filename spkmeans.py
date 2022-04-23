@@ -11,22 +11,21 @@ def initial_centroids(datapoints, k):
     __________
     datapoints: np.array(n,d)
     k: int
-
     return the random chosen centroids and their indices based on kmeans++ algorithem.
     """
     index = []
     n, d = datapoints.shape[0], datapoints.shape[1]
     centroids = np.zeros((k, d))
     rnd = np.random.choice(n, size=1)
-    cur_chosen_m = datapoints[rnd]
+    cur_chosen_m = datapoints[rnd[-1]]
     index.append(rnd[0])
     centroids[0] = cur_chosen_m
     i = 1
     while i < k:
-        distance_lst, distance_sum = calc_distances(centroids, datapoints, i, n)
-        probs_lst = calc_probs(distance_lst, distance_sum)
+        distance, distance_sum = calc_distances(centroids, datapoints, i, n)
+        probs = distance/distance_sum
         i += 1
-        centroids[i - 1], rnd = rnd_select_m(probs_lst, datapoints)
+        centroids[i - 1], rnd = rnd_select_m(probs.tolist(), datapoints)
         index.append(rnd)
     return centroids, index
 
@@ -35,15 +34,6 @@ def rnd_select_m(probs, datapoints):
     n = len(datapoints)
     idx = np.random.choice(np.arange(n), p=probs)
     return datapoints[idx], idx
-
-
-def calc_cumulative_array(arr):
-    res = [0 for i in range(len(arr))]
-    res[0] = arr[0]
-    j = 1
-    for num in arr[1:]:
-        res[j] = res[j - 1] + num
-    return res
 
 
 def calc_distances(centroids, datapoints, i, n):
@@ -58,30 +48,14 @@ def calc_distances(centroids, datapoints, i, n):
             cur_min_distance = min(sqr_distance(centroids[j], datapoints[l]), cur_min_distance)
         distance_lst.append(cur_min_distance)
         distance_sum += cur_min_distance
-    return distance_lst, distance_sum
-
-
-def calc_probs(distance_lst, distance_sum):
-    """
-    :param distance_lst: list[int]
-    :param distance_sum: int
-    :return: The distributivity function of datapoints selection
-    """
-    res = []
-    n = len(distance_lst)
-    for l in range(n):
-        res.append(distance_lst[l] / distance_sum)
-    return res
+    return np.array(distance_lst), distance_sum
 
 
 def sqr_distance(m, x):
     """
     Calcualte Square distnce between two d-dimensional points.
     """
-    res = 0
-    for i in range(len(m)):
-        res += ((m[i] - x[i]) ** 2)
-    return res
+    return np.dot((m-x), (m-x))
 
 
 def print_results(centroids):
@@ -105,7 +79,7 @@ def main():
             raise Exception
         k = int(input_args[1])
 
-        if(k == 1):
+        if (k == 1):
             print("Invalid Input!")
             return
         goal = input_args[2]
@@ -124,10 +98,10 @@ def main():
             T = myspkmeans.get_goal(n, d, k, "spk", datapoints)
             heuristic_k = len(T[0])
             T = pd.DataFrame(T)
-            
+
             if k == 0:
                 k = heuristic_k
-                
+
             centroids, centroids_index = initial_centroids(T.to_numpy(), k)
             kmeans_new_centroids = myspkmeans.kmeans(n, heuristic_k, k, T.values.tolist(), centroids.tolist())
             print(",".join([str(x) for x in centroids_index]))

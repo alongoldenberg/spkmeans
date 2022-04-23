@@ -43,7 +43,17 @@ static int calculate_k(double **datapoints, int n, int d){
     eigenvalues = get_diagonal(laplacian, n);
     sort_eigenvalues_and_vectors(eigenvalues, eigenvectors, s_eigenvalues, s_eigenvectors, n);
     k = eigengap_hueuristic(s_eigenvalues, n);
-
+    
+    free(weights[0]);
+    free(weights);
+    free(laplacian[0]);
+    free(laplacian);
+    free(degree);
+    free(eigenvectors[0]);
+    free(eigenvectors);
+    free(s_eigenvectors);
+    free(eigenvalues);
+    free(s_eigenvalues);
     return k;
 }
 
@@ -145,7 +155,6 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
         double **eigen_vectors;
         PyObject *eigen_vectors_py, *datapoints_py_type; 
         eigen_vectors = jacobi_function(datapoints, EPSILON, n);  /*here datapoints is symitric matrix with eignvalues over the diagonal*/
-        transpose(eigen_vectors, n);
         eigen_vectors_py = data_c_to_py_type(eigen_vectors, n, n);
         datapoints_py_type = data_c_to_py_type(datapoints, n, n);
         free(eigen_vectors[0]);
