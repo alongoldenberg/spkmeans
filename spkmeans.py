@@ -30,6 +30,10 @@ def initial_centroids(datapoints, k):
 
 
 def rnd_select_m(probs, datapoints):
+    """
+    select randomly datapoint to be a centroid
+    using probs list as part of kmeans++ algorithm
+    """
     n = len(datapoints)
     idx = np.random.choice(np.arange(n), p=probs)
     return datapoints[idx], idx
@@ -58,15 +62,21 @@ def sqr_distance(m, x):
     return np.dot((m-x), (m-x))
 
 
-def print_results(centroids):
-    for centroid in centroids:
-        print(",".join('%.4f' % x for x in centroid))
+def print_results(rows):
+    """
+    print matrix line by line at the required format (4 decimal places)
+    """
+    for r in rows:
+        print(",".join('%.4f' % x for x in r))
 
 
 def print_eigenvalues(eigenvalues):
+    """
+        print eigenvalues at the required format (4 decimal places)
+    """
     diagonal = np.diag(np.array(eigenvalues))
     diagonal = [round(num, 4) for num in diagonal]
-    for i in range(len(diagonal)):
+    for i in range(len(diagonal)):  # handle negative 0 situation
         if diagonal[i] == 0:  # find all 0 including -0.0
             diagonal[i] = 0.0
     print(",".join('%.4f' % x for x in diagonal))
@@ -88,25 +98,29 @@ def main():
         datapoints = datapoints.to_numpy().tolist()
         n = len(datapoints)
         d = len(datapoints[0])
-        if (goal == "spk") and (k >= len(datapoints) or k < 0 or k==1):
+        if (goal == "spk") and (k >= len(datapoints) or k < 0 or k == 1):
             raise Exception
     except:
         print("Invalid Input!")
         return
     try:
         if goal == "spk":
+            #  get T matrix and conclude k:
             T = myspkmeans.get_goal(n, d, k, "spk", datapoints)
             heuristic_k = len(T[0])
             T = pd.DataFrame(T)
             if k == 0:
                 k = heuristic_k
+            #  initiate centroids using kmeans++ algorithm:
             centroids, centroids_index = initial_centroids(T.to_numpy(), k)
+            #  calc new centroids according to spkmeans algorithm:
             kmeans_new_centroids = myspkmeans.kmeans(n, heuristic_k, k,
                                                      T.values.tolist(),
                                                      centroids.tolist())
             print(",".join([str(x) for x in centroids_index]))
             print_results(np.array(kmeans_new_centroids))
         elif goal == "jacobi":
+            #  get eigenvalues and eigenvectors using jacobi algorithm:
             values_and_vectors = myspkmeans.get_goal(n, d, k, goal,
                                                      datapoints)
             values = values_and_vectors[0]  # diagonal matrix form
@@ -114,6 +128,8 @@ def main():
             print_eigenvalues(values)
             print_results(np.array(vectors))
         else:
+            # for all other goals ("wam", "ddg", "lnorm"),
+            # get and print result using get goal function
             print_results(np.array(myspkmeans.get_goal(n, d, k, goal,
                                                        datapoints)))
     except:

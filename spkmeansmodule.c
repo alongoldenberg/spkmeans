@@ -19,11 +19,11 @@ static int calculate_k(double **datapoints, int n, int d);
 
 static int calculate_k(double **datapoints, int n, int d){
 /**
- * Preform the full spectral k-means algorithm, return k first eigenvectors.
- *
+ * Find k using eigengap_hueuristic function.
+ * 
  * @param datapoints - 2D array of datapoints size n*d.
  * @invariant - n and d are initialized.
-  *@result T - requested matrix
+  *@result k
  */
     double **weights, *degree, **laplacian, *eigenvalues, **eigenvectors,
             *s_eigenvalues, **s_eigenvectors;
@@ -58,6 +58,13 @@ static int calculate_k(double **datapoints, int n, int d){
 
 static double** data_py_to_c_type(PyObject* datapoints_py_type,
                                   int data_size_n, int data_dimension){
+/**
+ * Create C type matrix and copy data to it from input
+ * @param datapoints_py_type - 2D array of datapoints size data_size_n*data_dimension.
+ * @invariant - data_size_n and data_dimension are initialized.
+ * @result c_data_pointer - requested matrix
+ * 
+ */
     double **c_data_pointer; Py_ssize_t i, j;
     PyObject *py_point_vector;
     c_data_pointer = allocate_data(data_size_n, data_dimension);
@@ -79,6 +86,13 @@ static double** data_py_to_c_type(PyObject* datapoints_py_type,
 
 static PyObject* data_c_to_py_type(double** data_c_type,
                                    int data_size_n, int data_dimension){
+/**
+ * Create Py type matrix and copy data to it from input
+ * @param data_c_type - 2D array of datapoints size data_size_n*data_dimension.
+ * @invariant - data_size_n and data_dimension are initialized.
+ * @result py_data_pointer - requested matrix
+ * 
+ */
     PyObject* py_data_pointer = PyList_New(0);
     int i, j;
     PyObject* py_point_vector;
@@ -94,10 +108,15 @@ static PyObject* data_c_to_py_type(double** data_c_type,
 
 
 static PyObject* get_goal_capi(PyObject *self, PyObject *args){
+/**
+ * Get goal set by the user through spkmeans.py (handle each goal separately).
+ * return PyObject of the results
+ */
     PyObject *datapoints_py_type, *result;
     char* my_goal_c_type;
-    int n, d, k;
+    int n, d, k; 
     double **datapoints; 
+    /* parse arguments: */
     if(!PyArg_ParseTuple(args, "iiisO:get_goal", &n, &d, &k,
                          &my_goal_c_type, &datapoints_py_type)) {
         return NULL; 
@@ -105,9 +124,10 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
     if (!PyList_Check(datapoints_py_type)){
         return NULL;
     }
-       
+    /* create c type object of datapoints: */
     datapoints = data_py_to_c_type(datapoints_py_type, n, d);   
     
+    /* handle goals: */
     if  (strcmp("spk", my_goal_c_type)==0){
         double **T;
         T = spectral_clustrering(datapoints, n, d, k);
@@ -167,9 +187,10 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
         free(eigen_vectors);
         free(datapoints[0]);
         free(datapoints);
+        /* in this case only the function returns two matrixes */
         return Py_BuildValue("OO", datapoints_py_type, eigen_vectors_py);
     }
-    else{
+    else{ /* if the goal is not valid */
         printf("Invalid Input!");
         free(datapoints[0]);
         free(datapoints);
@@ -182,6 +203,11 @@ static PyObject* get_goal_capi(PyObject *self, PyObject *args){
 
 
 static PyObject* calc_kmeans_capi(PyObject *self, PyObject *args){
+/**
+ * update centroids according to kmeans algorithm.
+ * this function parse PyObjects to c objectes, calculate centroids,
+ * and return the new centroids as PyObjects
+ */
     PyObject* datapoints_py_type;
     PyObject* centroids_py_type;
     double** datapoints;
@@ -210,6 +236,10 @@ static PyObject* calc_kmeans_capi(PyObject *self, PyObject *args){
 }
 
 
+/*
+ * The methods this module has.
+ * We will use it in the next structure
+ */
 static PyMethodDef spkmethods[] = {
         {"get_goal",
                 (PyCFunction) get_goal_capi,
@@ -222,9 +252,10 @@ static PyMethodDef spkmethods[] = {
         {NULL, NULL, 0, NULL}
 };
 
+/* Initiates the module using the above definitions. */
 static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
-        "myspkmeans",
+        "myspkmeans", /* name of module */
         NULL,
         -1,
         spkmethods
