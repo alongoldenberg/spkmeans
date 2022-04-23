@@ -543,21 +543,21 @@ int main(int argc, char *argv[]) {
     }
     else if(strcmp(goal, "jacobi") == 0) {
         if (n!=d){
-            printf("Invalid Input!\n");
+            printf("Invalid Input\n");
             free(datapoints[0]);
             free(datapoints);
             return 1;
         }
         eigen_vectors = jacobi_function(datapoints, EPSILON, n);
         eigenvalues = get_diagonal(datapoints, n);
-        print_arr(eigenvalues, n);
+        print_eigenvalues(eigenvalues, n);
         print_matrix(eigen_vectors, n, n);
+        free(eigenvalues);
         free(eigen_vectors[0]);
         free(eigen_vectors);
-        free(eigenvalues);
     }
     else{
-        printf("Invalid Input!\n");
+        printf("Invalid Input\n");
         free(datapoints[0]);
         free(datapoints);
         return 1;

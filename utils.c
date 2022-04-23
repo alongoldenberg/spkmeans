@@ -34,13 +34,13 @@ double **allocate_data(int n, int d) {
 }
 
 void print_error(void){
-    printf("An Error Has Occurred!\n");
+    printf("An Error Has Occurred\n");
     exit(1);
 }
 
 
 void print_invalid_input(void){
-    printf("Invalid Input!\n");
+    printf("Invalid Input\n");
     exit(1);
 }
 
@@ -76,6 +76,23 @@ void print_arr(double *arr, int n) {
                 printf("%.4f", arr[i]);
             }
             else{
+                printf("%.4f,", arr[i]);
+            }
+        }
+    printf("\n");
+}
+
+
+void print_eigenvalues(double *arr, int n) {
+    int i;
+    for (i = 0; i < n; i++) {
+        if (fabs(arr[i]) < 0.00005){
+            arr[i] = 0;
+            }
+        if(i==(n-1)){
+                printf("%.4f", arr[i]);
+            }
+        else{
                 printf("%.4f,", arr[i]);
             }
         }
