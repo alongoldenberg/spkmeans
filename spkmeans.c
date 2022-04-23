@@ -133,7 +133,7 @@ double **normalized_laplacian(double **weights, const double *degree, int n){
 double rotate_jacobian(double **a, double **a_tag, double **p, int n) {
     int i, j; double s, c, t; double max_value;
     i=0;
-    j=0;
+    j=1;
     max_off_diagonal(a, n, &i, &j);
     if (a[i][j]==0){
         return 0;
