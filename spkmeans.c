@@ -22,14 +22,27 @@ void transpose(double** A, int n){
     }
 }
 
+
+void check_newline(FILE *file){
+    /* Script to check if file ends with new line from StackOverflow*/
+    long pos;
+    fseek(file, 0, SEEK_END);
+    pos = ftell(file) - 2;
+    fseek(file, 0, pos);
+    if(getc(file) != '\n' || getc(file) != '\n'){
+        print_invalid_input();
+    }
+}
+
+
 double **parse_file(char *filename, int* n, int* d){
     /* Allocate memory and put data from file to a 2d array */
     FILE *data = NULL; double **arr; double num; int i,j;
-
     data = fopen(filename, "r");
     if(data == NULL){
         print_invalid_input();
     }
+    check_newline(data);
     *n = count_lines(data);
     *d = count_d(data);
     arr = allocate_data(*n, *d);
